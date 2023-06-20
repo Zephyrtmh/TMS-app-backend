@@ -20,4 +20,4 @@ async function checkIfUserExists(username) {
     }
 }
 
-module.exports = { getAllUsers };
+module.exports = { getAllUsers, checkIfUserExists };

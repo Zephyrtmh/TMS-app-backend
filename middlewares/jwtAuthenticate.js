@@ -11,11 +11,11 @@ module.exports.authenticateUser = catchAsyncErrors(async (req, res, next) => {
     if (!token) {
         return next(new ErrorHandler("Login to access this feature", 401));
     }
-    var userId = await verifyJWToken(token);
-    console.log(userId);
-    if (userId) {
+    var username = await verifyJWToken(token);
+    console.log(username);
+    if (username) {
         next();
     } else {
-        throw new ErrorHandler("Login to access this service");
+        throw new ErrorHandler("Login to access this service", 401);
     }
 });

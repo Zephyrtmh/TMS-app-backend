@@ -16,6 +16,8 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     //get user with same username
     var [rows, fields] = await userRepository.getUserByUsername(username);
 
+    console.log(rows);
+
     //validate query results to only return 1 user
     if (rows.length == 0) {
         throw new ErrorHandler("User does not exist");

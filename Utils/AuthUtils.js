@@ -10,8 +10,8 @@ async function verifyPassword(givenPassword, actualHashedPassword) {
     return bcrypt.compareSync(givenPassword, actualHashedPassword);
 }
 
-async function generateJWToken(userId) {
-    return jwt.sign({ userId: userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE_IN });
+async function generateJWToken(username) {
+    return jwt.sign({ username: username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE_IN });
 }
 
 async function verifyJWToken(token) {
@@ -21,7 +21,7 @@ async function verifyJWToken(token) {
             new ErrorHandler("Login to create new User", 401);
         }
         console.log(tokenPayload);
-        return tokenPayload.userId;
+        return tokenPayload.username;
     } catch (err) {
         new ErrorHandler("Login to create new User", 401);
     }

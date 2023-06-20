@@ -1,11 +1,13 @@
-const getUserById = `SELECT id, username, password, email FROM accounts where id = ?;`;
+const getUserByUsername = `SELECT username, password, email, user_group.userGroupName FROM accounts INNER JOIN user_group on accounts.userGroupId = user_group.userGroupId WHERE username = ?;`;
 
-const getUserByUsername = `SELECT id, username, password, email FROM accounts where username = ?;`;
+const getAllUsers = `SELECT username, password, email FROM accounts;`;
 
-const getAllUsers = `SELECT id, username, password, email FROM accounts;`;
+const createUser = `INSERT INTO accounts (username, password, email, active, userGroupId) values (?, ?, ?, ?, ?);`;
 
-const createUser = `INSERT INTO accounts (username, password, email, active, userGroup) values (?, ?, ?, ?, ?);`;
+const deleteUser = `DELETE FROM accounts WHERE username = ?;`;
 
-const deleteUser = `DELETE FROM accounts where username = ?;`;
+const updateUser = `UPDATE accounts SET password = ?, email = ?, active = ?, userGroupId = ? WHERE username = ?`;
 
-module.exports = { getUserById, createUser, getAllUsers, getUserByUsername, deleteUser };
+const deactivateUser = `UPDATE accounts SET active = "inactive" WHERE username = ?`;
+
+module.exports = { createUser, getAllUsers, getUserByUsername, deleteUser, updateUser, deactivateUser };

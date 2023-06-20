@@ -11,7 +11,7 @@ class UserRepository {
             throw new ErrorHandler("Username already exists. Try signing in or using a different username.", 422);
         }
         var hashedPassword = await authUtils.hashPassword(user.password);
-        var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroup]);
+        var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroupId]);
         return userCreated;
     }
 
@@ -24,10 +24,22 @@ class UserRepository {
         return userDeleted;
     }
 
-    async getUserById(userId) {
-        var user = await connection.execute(userSql.getUserById, [userId]);
-        user = user[0][0];
-        return new User(userId, user.username, user.password, user.email);
+    async deactivateUser(username) {
+        var existingUser = await this.getUserByUsername(username);
+        if (existingUser[0].length == 0) {
+            throw new ErrorHandler("User does not exist. Choose a different user to delete.");
+        }
+        var userDeactivated = await connection.execute(userSql.deactivateUser, [username]);
+        return userDeactivated;
+    }
+
+    async updateUser(user) {
+        var existingUser = await this.getUserByUsername(user.username);
+        if (existingUser[0].length == 0) {
+            throw new ErrorHandler("User does not exist. Choose a different user to update.");
+        }
+        var userUpdated = await connection.execute(userSql.updateUser, [user.password, user.email, user.active, user.userGroupId, user.username]);
+        return userUpdated;
     }
 
     async getAllUsers() {
