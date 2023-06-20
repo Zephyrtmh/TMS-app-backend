@@ -14,6 +14,10 @@ async function generateJWToken(username) {
     return jwt.sign({ username: username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE_IN });
 }
 
+function validatePassword(password) {
+    return /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,10}$/.test(password);
+}
+
 async function verifyJWToken(token) {
     try {
         const tokenPayload = jwt.verify(token, process.env.JWT_SECRET);
@@ -27,4 +31,4 @@ async function verifyJWToken(token) {
     }
 }
 
-module.exports = { hashPassword, verifyPassword, generateJWToken };
+module.exports = { hashPassword, verifyPassword, generateJWToken, validatePassword };

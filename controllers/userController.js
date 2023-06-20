@@ -10,7 +10,7 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 
     //create User Model
     var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroupId);
-    //create User
+
     var userCreated = await userRepository.createUser(userToAdd);
     var numberUsersCreated = userCreated[0];
     console.log(numberUsersCreated);

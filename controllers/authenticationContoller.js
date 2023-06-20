@@ -16,13 +16,15 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     //get user with same username
     var [rows, fields] = await userRepository.getUserByUsername(username);
 
-    console.log(rows);
-
     //validate query results to only return 1 user
     if (rows.length == 0) {
         throw new ErrorHandler("User does not exist");
     } else if (rows.length > 1) {
         throw new ErrorHandler("More than one user with username exist. Check with admin");
+    }
+
+    if (rows[0].active === "inactive") {
+        throw new ErrorHandler("User is deactivated. Please contact your admin");
     }
 
     //verify password
@@ -36,17 +38,22 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     };
 
     if (verified) {
-        const jwToken = await authUtils.generateJWToken(rows[0].id);
+        const jwToken = await authUtils.generateJWToken(rows[0].username);
 
-        res.status(200).cookie("token", jwToken, cookieOptions).json({
+        res.status(200).cookie("jwToken", jwToken, cookieOptions).json({
             success: true,
             token: jwToken,
         });
     } else {
         const jwToken = "";
-        res.status(401).cookie("token", jwToken, cookieOptions).json({
+        res.status(401).cookie("jwToken", jwToken, cookieOptions).json({
             success: false,
             token: "",
         });
     }
+});
+
+module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
+    res.clearCookie("jwToken");
+    res.status(200).send("Successfully logged out of the system. Thank you.");
 });

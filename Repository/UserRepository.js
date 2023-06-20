@@ -9,6 +9,8 @@ class UserRepository {
         var existingUser = await this.getUserByUsername(user.username);
         if (existingUser[0].length > 0) {
             throw new ErrorHandler("Username already exists. Try signing in or using a different username.", 422);
+        } else if (!authUtils.validatePassword(user.password)) {
+            throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.");
         }
         var hashedPassword = await authUtils.hashPassword(user.password);
         var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroupId]);
