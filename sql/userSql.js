@@ -1,4 +1,4 @@
-const getUserByUsername = `SELECT username, password, email, active, user_group.userGroupName FROM accounts INNER JOIN user_group on accounts.userGroupId = user_group.userGroupId WHERE username = ?;`;
+const getUserByUsername = `SELECT username, password, email, active, user_group.userGroupName AS userGroup FROM accounts INNER JOIN user_group on accounts.userGroupId = user_group.userGroupId WHERE username = ?;`;
 
 const getAllUsers = `SELECT username, password, email FROM accounts;`;
 
@@ -10,4 +10,6 @@ const updateUser = `UPDATE accounts SET password = ?, email = ?, active = ?, use
 
 const deactivateUser = `UPDATE accounts SET active = "inactive" WHERE username = ?`;
 
-module.exports = { createUser, getAllUsers, getUserByUsername, deleteUser, updateUser, deactivateUser };
+const activateUser = `UPDATE accounts SET active = "active" WHERE username = ?`;
+
+module.exports = { createUser, getAllUsers, getUserByUsername, deleteUser, updateUser, deactivateUser, activateUser };

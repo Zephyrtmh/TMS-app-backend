@@ -6,6 +6,14 @@ const ErrorHandler = require("./utils/errorHandler");
 
 const cookieParser = require("cookie-parser");
 
+const cors = require("cors");
+
+app.use(
+    cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.use(cookieParser());
 

@@ -15,16 +15,23 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 
     //get user with same username
     var [rows, fields] = await userRepository.getUserByUsername(username);
-
-    //validate query results to only return 1 user
+    //check that User is active
     if (rows.length == 0) {
-        throw new ErrorHandler("User does not exist");
+        //validate query results to only return 1 user
+        res.status(401).json({
+            success: false,
+            reason: "User does not exist",
+        });
     } else if (rows.length > 1) {
-        throw new ErrorHandler("More than one user with username exist. Check with admin");
-    }
-
-    if (rows[0].active === "inactive") {
-        throw new ErrorHandler("User is deactivated. Please contact your admin");
+        res.status(401).json({
+            success: false,
+            reason: "More than one user with username exist. Check with admin",
+        });
+    } else if (rows[0].active === "inactive") {
+        res.status(401).json({
+            success: false,
+            reason: "User is deactivated. Please contact your admin",
+        });
     }
 
     //verify password
@@ -35,6 +42,7 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     const cookieOptions = {
         expire: expirationDate,
         httpOnly: true,
+        path: "/",
     };
 
     if (verified) {
@@ -42,13 +50,15 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 
         res.status(200).cookie("jwToken", jwToken, cookieOptions).json({
             success: true,
-            token: jwToken,
+            username: rows[0].username,
+            userGroup: rows[0].userGroup,
+            active: rows[0].active,
         });
     } else {
         const jwToken = "";
-        res.status(401).cookie("jwToken", jwToken, cookieOptions).json({
+        res.status(401).json({
             success: false,
-            token: "",
+            reason: "Incorrect password. Please try again with a different password",
         });
     }
 });
@@ -56,4 +66,11 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
     res.clearCookie("jwToken");
     res.status(200).send("Successfully logged out of the system. Thank you.");
+});
+
+module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
+    const jwToken = req.cookie.jwToken;
+    const username = await authUtils.verifyJWToken(jwToken);
+    //TODO - (1) check if user is still active, (1) check if user-group matches
+    res.status(200);
 });

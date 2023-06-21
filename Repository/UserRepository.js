@@ -35,6 +35,15 @@ class UserRepository {
         return userDeactivated;
     }
 
+    async activateUser(username) {
+        var existingUser = await this.getUserByUsername(username);
+        if (existingUser[0].length == 0) {
+            throw new ErrorHandler("User does not exist. Choose a different user to delete.");
+        }
+        var userDeactivated = await connection.execute(userSql.activateUser, [username]);
+        return userDeactivated;
+    }
+
     async updateUser(user) {
         var existingUser = await this.getUserByUsername(user.username);
         if (existingUser[0].length == 0) {

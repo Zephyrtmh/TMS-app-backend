@@ -12,10 +12,9 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroupId);
 
     var userCreated = await userRepository.createUser(userToAdd);
-    var numberUsersCreated = userCreated[0];
-    console.log(numberUsersCreated);
+    var numberUsersCreated = userCreated[0].affectedRows;
 
-    if (!numberUsersCreated) {
+    if (numberUsersCreated === 0) {
         res.status(422).json({
             success: false,
             reason: "Something went wrong. User was not created.",
@@ -51,13 +50,26 @@ module.exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 module.exports.deactivateUser = catchAsyncErrors(async (req, res, next) => {
     const username = req.body.username;
     var userRepository = new UserRepository();
-    var userDeleted = await userRepository.deactivateUser(username);
-    var numberUsersDeleted = userDeleted[0].affectedRows;
+    var userDeactivated = await userRepository.deactivateUser(username);
+    var numberUserDeactivated = userDeactivated[0].affectedRows;
 
     res.status(200).json({
         success: true,
         deleted: username,
-        updatedRows: numberUsersDeleted,
+        updatedRows: numberUserDeactivated,
+    });
+});
+
+module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
+    const username = req.body.username;
+    var userRepository = new UserRepository();
+    var userActivated = await userRepository.activateUser(username);
+    var numberUserActivated = userActivated[0].affectedRows;
+
+    res.status(200).json({
+        success: true,
+        deleted: username,
+        updatedRows: numberUserActivated,
     });
 });
 
