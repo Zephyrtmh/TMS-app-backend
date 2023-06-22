@@ -9,7 +9,8 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     var userRepository = new UserRepository();
 
     //create User Model
-    var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroupId);
+    console.log(req.body);
+    var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroupName);
 
     var userCreated = await userRepository.createUser(userToAdd);
     var numberUsersCreated = userCreated[0].affectedRows;
@@ -32,6 +33,12 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 module.exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
     var users = await userService.getAllUsers();
     res.status(200).send(users);
+});
+
+module.exports.getUserByUsername = catchAsyncErrors(async (req, res, next) => {
+    var userRepository = new UserRepository();
+    var user = await userRepository.getUserByUsername(req.params.username);
+    res.status(200).send(user[0][0]);
 });
 
 module.exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
@@ -74,13 +81,13 @@ module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
-    var username = req.body.username;
+    var username = req.params.username;
     var password = req.body.password;
     var email = req.body.email;
     var active = req.body.active;
-    var userGroupId = req.body.userGroupId;
+    var userGroup = req.body.userGroup;
 
-    var user = new User(username, password, email, active, userGroupId);
+    var user = new User(username, password, email, active, userGroup);
 
     var userRepository = new UserRepository();
     var userUpdated = await userRepository.updateUser(user);

@@ -10,17 +10,18 @@ class UserRepository {
         if (existingUser[0].length > 0) {
             throw new ErrorHandler("Username already exists. Try signing in or using a different username.", 422);
         } else if (!authUtils.validatePassword(user.password)) {
-            throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.");
+            throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.", 400);
         }
         var hashedPassword = await authUtils.hashPassword(user.password);
-        var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroupId]);
+        console.log(user);
+        var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroupName]);
         return userCreated;
     }
 
     async deleteUser(username) {
         var existingUser = await this.getUserByUsername(username);
         if (existingUser[0].length == 0) {
-            throw new ErrorHandler("User does not exist. Choose a different user to delete.");
+            throw new ErrorHandler("User does not exist. Choose a different user to delete.", 404);
         }
         var userDeleted = await connection.execute(userSql.deleteUser, [username]);
         return userDeleted;
@@ -29,7 +30,7 @@ class UserRepository {
     async deactivateUser(username) {
         var existingUser = await this.getUserByUsername(username);
         if (existingUser[0].length == 0) {
-            throw new ErrorHandler("User does not exist. Choose a different user to delete.");
+            throw new ErrorHandler("User does not exist. Choose a different user to delete.", 404);
         }
         var userDeactivated = await connection.execute(userSql.deactivateUser, [username]);
         return userDeactivated;
@@ -38,7 +39,7 @@ class UserRepository {
     async activateUser(username) {
         var existingUser = await this.getUserByUsername(username);
         if (existingUser[0].length == 0) {
-            throw new ErrorHandler("User does not exist. Choose a different user to delete.");
+            throw new ErrorHandler("User does not exist. Choose a different user to delete.", 404);
         }
         var userDeactivated = await connection.execute(userSql.activateUser, [username]);
         return userDeactivated;
@@ -47,9 +48,13 @@ class UserRepository {
     async updateUser(user) {
         var existingUser = await this.getUserByUsername(user.username);
         if (existingUser[0].length == 0) {
-            throw new ErrorHandler("User does not exist. Choose a different user to update.");
+            throw new ErrorHandler("User does not exist. Choose a different user to update.", 404);
         }
-        var userUpdated = await connection.execute(userSql.updateUser, [user.password, user.email, user.active, user.userGroupId, user.username]);
+        if (!authUtils.validatePassword(user.password)) {
+            throw new ErrorHandler("Password invalid try again", 400);
+        }
+        const newPassword = await authUtils.hashPassword(user.password);
+        var userUpdated = await connection.execute(userSql.updateUser, [newPassword, user.email, user.active, user.userGroupName, user.username]);
         return userUpdated;
     }
 
@@ -58,7 +63,7 @@ class UserRepository {
         users = users[0];
         var usersMapped = [];
         users.forEach((user) => {
-            usersMapped.push(new User(user.id, user.username, user.password, user.email));
+            usersMapped.push(new User(user.username, user.password, user.email, user.active, user.userGroup));
         });
         return usersMapped;
     }

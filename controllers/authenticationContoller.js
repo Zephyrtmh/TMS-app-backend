@@ -43,6 +43,7 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
         expire: expirationDate,
         httpOnly: true,
         path: "/",
+        domain: "localhost",
     };
 
     if (verified) {

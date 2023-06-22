@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const errorMiddleware = require("./middlewares/errors");
 const userRoutes = require("./routes/user");
+const groupRoutes = require("./routes/group");
 const ErrorHandler = require("./utils/errorHandler");
 
 const cookieParser = require("cookie-parser");
@@ -27,6 +28,7 @@ const authenticationRoutes = require("./routes/authentication");
 app.use(authenticationRoutes);
 app.use(errorMiddleware);
 app.use(userRoutes);
+app.use(groupRoutes);
 
 app.all("*", (req, res, next) => {
     next(new ErrorHandler(`${req.originalUrl} route not found`, 404));
