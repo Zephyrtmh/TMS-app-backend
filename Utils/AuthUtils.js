@@ -22,6 +22,7 @@ function validatePassword(password) {
 async function verifyJWToken(token) {
     try {
         const tokenPayload = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(tokenPayload);
         if (!tokenPayload) {
             throw new ErrorHandler("Login to access service", 401);
         }

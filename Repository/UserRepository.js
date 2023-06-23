@@ -13,7 +13,7 @@ class UserRepository {
             throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.", 400);
         }
         var hashedPassword = await authUtils.hashPassword(user.password);
-        console.log(user);
+        console.log("just before running query: " + user.userGroupName + user.active);
         var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroupName]);
         return userCreated;
     }
@@ -45,8 +45,17 @@ class UserRepository {
         return userDeactivated;
     }
 
-    async updateUser(user) {
+    async updateUser(user, changePassword) {
         var existingUser = await this.getUserByUsername(user.username);
+
+        if (!changePassword) {
+            if (existingUser[0].length == 0) {
+                throw new ErrorHandler("User does not exist. Choose a different user to update.", 404);
+            }
+            var userUpdated = await connection.execute(userSql.updateUserExcludingPassword, [user.email, user.active, user.userGroupName, user.username]);
+            return userUpdated;
+        }
+
         if (existingUser[0].length == 0) {
             throw new ErrorHandler("User does not exist. Choose a different user to update.", 404);
         }
@@ -54,7 +63,7 @@ class UserRepository {
             throw new ErrorHandler("Password invalid try again", 400);
         }
         const newPassword = await authUtils.hashPassword(user.password);
-        var userUpdated = await connection.execute(userSql.updateUser, [newPassword, user.email, user.active, user.userGroupName, user.username]);
+        var userUpdated = await connection.execute(userSql.updateUserIncludingPassword, [newPassword, user.email, user.active, user.userGroupName, user.username]);
         return userUpdated;
     }
 
@@ -63,7 +72,7 @@ class UserRepository {
         users = users[0];
         var usersMapped = [];
         users.forEach((user) => {
-            usersMapped.push(new User(user.username, user.password, user.email, user.active, user.userGroup));
+            usersMapped.push(new User(user.username, user.password, user.email, user.active, user.userGroupName));
         });
         return usersMapped;
     }

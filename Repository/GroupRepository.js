@@ -11,8 +11,13 @@ class GroupRepository {
     }
 
     async createUserGroup(userGroupName) {
-        var userGroups = await connection.execute(userGroupSql.createUserGroup, [userGroupName]);
-        return userGroupName;
+        try {
+            var userGroup = await connection.execute(userGroupSql.createUserGroup, [userGroupName]);
+        } catch (err) {
+            throw new ErrorHandler(err.message, 409);
+        }
+
+        return userGroup;
     }
 }
 

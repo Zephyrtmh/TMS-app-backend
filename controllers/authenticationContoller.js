@@ -48,11 +48,11 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 
     if (verified) {
         const jwToken = await authUtils.generateJWToken(rows[0].username);
-
+        console.log(expirationDate);
         res.status(200).cookie("jwToken", jwToken, cookieOptions).json({
             success: true,
             username: rows[0].username,
-            userGroup: rows[0].userGroup,
+            userGroup: rows[0].userGroupName,
             active: rows[0].active,
         });
     } else {
@@ -67,6 +67,7 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
     res.clearCookie("jwToken");
     res.status(200).send("Successfully logged out of the system. Thank you.");
+    res.end();
 });
 
 module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {

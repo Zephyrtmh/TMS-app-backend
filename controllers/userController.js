@@ -10,9 +10,19 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 
     //create User Model
     console.log(req.body);
-    var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroupName);
+    var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroup);
 
-    var userCreated = await userRepository.createUser(userToAdd);
+    try {
+        var userCreated = await userRepository.createUser(userToAdd);
+    } catch (err) {
+        console.log(err);
+        res.status(err.statusCode).json({
+            success: false,
+            reason: err.message,
+        });
+        return next(err);
+    }
+
     var numberUsersCreated = userCreated[0].affectedRows;
 
     if (numberUsersCreated === 0) {
@@ -90,7 +100,7 @@ module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     var user = new User(username, password, email, active, userGroup);
 
     var userRepository = new UserRepository();
-    var userUpdated = await userRepository.updateUser(user);
+    var userUpdated = await userRepository.updateUser(user, req.body.changePassword);
     var numberUsersUpdated = userUpdated[0].affectedRows;
 
     res.status(200).json({

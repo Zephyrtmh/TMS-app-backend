@@ -5,7 +5,7 @@ const { createUser, getAllUsers, deleteUser, updateUser, deactivateUser, activat
 const { authenticateUser } = require("../middlewares/jwtAuthenticate");
 const { accessUserDetails } = require("../middlewares/authorization");
 
-router.route("/user/create").post(createUser);
+router.route("/user/create").post(authenticateUser, createUser);
 router.route("/user/delete").post(authenticateUser, deleteUser);
 router.route("/user/deactivate").post(authenticateUser, deactivateUser);
 router.route("/user/activate").post(authenticateUser, activateUser);
