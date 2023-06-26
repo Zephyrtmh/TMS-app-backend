@@ -47,7 +47,9 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     };
 
     if (verified) {
-        const jwToken = await authUtils.generateJWToken(rows[0].username);
+        const ipAddress = req.ip;
+        const browserType = req.headers["user-agent"];
+        const jwToken = await authUtils.generateJWToken(rows[0].username, ipAddress, browserType);
         console.log(expirationDate);
         res.status(200).cookie("jwToken", jwToken, cookieOptions).json({
             success: true,
@@ -71,8 +73,30 @@ module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
-    const jwToken = req.cookie.jwToken;
-    const username = await authUtils.verifyJWToken(jwToken);
+    const jwToken = req.cookies.jwToken;
+    const jwtContent = await authUtils.verifyJWToken(jwToken);
+    //information stored in JWT
+    const jwtIpAddress = jwtContent.ipAddress;
+    const jwtUsername = jwtContent.username;
+    const jwtBrowserType = jwtContent.browserType;
+
+    //information from verfity req
+    const currIpAddress = req.ip;
+    const currBrowserType = req.headers["user-agent"];
+    console.log("jwtIP: " + jwtIpAddress + "currIP: " + currIpAddress);
+    console.log("JWTbrowserType: " + jwtBrowserType + " currBrowserType: " + currBrowserType);
+
+    if (jwtIpAddress !== currIpAddress || jwtBrowserType !== currBrowserType) {
+        console.log(jwtBrowserType === currBrowserType);
+        res.status(401).json({ verified: false });
+        return next();
+    }
+
+    const userRepository = new UserRepository();
+    var user = await userRepository.getUserByUsername(jwtUsername);
+    console.log();
+
     //TODO - (1) check if user is still active, (1) check if user-group matches
-    res.status(200);
+    res.status(200).json({ verifed: true, user: user[0][0] });
+    // next();
 });

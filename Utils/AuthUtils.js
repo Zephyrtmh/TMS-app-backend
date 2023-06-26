@@ -11,8 +11,8 @@ async function verifyPassword(givenPassword, actualHashedPassword) {
     return bcrypt.compareSync(givenPassword, actualHashedPassword);
 }
 
-async function generateJWToken(username) {
-    return jwt.sign({ username: username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE_IN });
+async function generateJWToken(username, ipAddress, browserType) {
+    return jwt.sign({ username: username, ipAddress: ipAddress, browserType: browserType }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE_IN });
 }
 
 function validatePassword(password) {
@@ -26,7 +26,7 @@ async function verifyJWToken(token) {
         if (!tokenPayload) {
             throw new ErrorHandler("Login to access service", 401);
         }
-        return tokenPayload.username;
+        return tokenPayload;
     } catch (err) {
         if (err.name === "TokenExpiredError") {
             throw new ErrorHandler("JWToken expired. Login to access service", 401);
@@ -35,5 +35,9 @@ async function verifyJWToken(token) {
         }
     }
 }
+
+// async function checkGroup(username, userGroup) {
+//
+// }
 
 module.exports = { hashPassword, verifyPassword, generateJWToken, validatePassword, verifyJWToken };

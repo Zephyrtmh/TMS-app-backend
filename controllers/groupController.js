@@ -12,6 +12,10 @@ module.exports.createUserGroup = catchAsyncErrors(async (req, res, next) => {
     try {
         var userGroup = await groupRepository.createUserGroup(req.body.userGroup);
         console.log(userGroup);
+        res.status(200).json({
+            success: true,
+            userGroup: req.body.userGroup,
+        });
     } catch (err) {
         console.log(err.statusCode + err.message);
         if (err.statusCode === 409) {
@@ -19,8 +23,4 @@ module.exports.createUserGroup = catchAsyncErrors(async (req, res, next) => {
             return next(err);
         }
     }
-    res.status(200).send({
-        success: true,
-        userGroup: req.body.userGroup,
-    });
 });

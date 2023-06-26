@@ -16,7 +16,7 @@ class GroupRepository {
         } catch (err) {
             throw new ErrorHandler(err.message, 409);
         }
-
+        console.log(userGroup);
         return userGroup;
     }
 }
