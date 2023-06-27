@@ -12,10 +12,42 @@ class UserRepository {
         } else if (!authUtils.validatePassword(user.password)) {
             throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.", 400);
         }
+
+        var userGroupNames = user.userGroupNames;
+
+        const usernameUserGroupPairs = userGroupNames.map((userGroup) => {
+            return [user.username, userGroup];
+        });
+
         var hashedPassword = await authUtils.hashPassword(user.password);
-        console.log("just before running query: " + user.userGroupName + user.active);
-        var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active, user.userGroupName]);
-        return userCreated;
+
+        try {
+            //add user into ACCOUNTS table
+            var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active]);
+
+            //map username to usergroups in ACCOUNTS_USERGROUPS table
+            const queryWildCards = usernameUserGroupPairs.map(() => "(?, ?)").join(", ");
+
+            var query = userSql.createUserWithGroups + queryWildCards;
+            var usernameUserGroupPairsflattened = [].concat(...usernameUserGroupPairs);
+
+            //add mappings into ACCOUNTS_USERGROUPS table
+            var userGroupsMapped = await connection.execute(query, usernameUserGroupPairsflattened);
+
+            var usersCreated = userCreated[0].affectedRows;
+            var userGroupsMapCreated = userGroupsMapped[0].affectedRows;
+
+            var data = {
+                success: true,
+                username: user.username,
+                createdUser: usersCreated,
+                createdMappings: userGroupsMapCreated,
+            };
+        } catch (err) {
+            //TODO: handle error
+            console.log(err);
+        }
+        return data;
     }
 
     async deleteUser(username) {
@@ -68,18 +100,52 @@ class UserRepository {
     }
 
     async getAllUsers() {
+        //get all users data inner joined with ACCOUNTS_USERGROUPS table
         var users = await connection.execute(userSql.getAllUsers);
-        users = users[0];
-        var usersMapped = [];
-        users.forEach((user) => {
-            usersMapped.push(new User(user.username, user.password, user.email, user.active, user.userGroupName));
-        });
-        return usersMapped;
+
+        //process to group userGroupData together:
+        /*
+        {
+            username: 'test8',
+            password: 'password',
+            email: 'admin1@email.com',
+            active: 'active',
+            userGroups: [ 'admin', 'project lead', 'project manager' ]
+        }
+        */
+        const formattedUsers = users[0].reduce((result, user) => {
+            const { username, password, email, active, userGroupName } = user;
+
+            if (!result[username]) {
+                result[username] = { username, password, email, active, userGroups: [userGroupName] };
+            } else {
+                result[username].userGroups.push(userGroupName);
+            }
+            return result;
+        }, []);
+
+        const finalUsersData = Object.values(formattedUsers);
+        console.log(finalUsersData);
+        return finalUsersData;
     }
 
     async getUserByUsername(username) {
         var users = await connection.execute(userSql.getUserByUsername, [username]);
-        return users;
+
+        const formattedUser = users[0].reduce((result, user) => {
+            const { username, password, email, active, userGroupName } = user;
+
+            if (!result[username]) {
+                result[username] = { username, password, email, active, userGroups: [userGroupName] };
+            } else {
+                result[username].userGroups.push(userGroupName);
+            }
+            return result;
+        }, []);
+
+        const finalUserData = Object.values(formattedUser);
+
+        return finalUserData;
     }
 }
 

@@ -19,6 +19,6 @@ router.route("/user/all").get(authenticateUser, getAllUsers);
 //     accessUserDetails,
 //     getUserByUsername
 // );
-router.route("/user/:username").post(authenticateUser, accessUserDetails, getUserByUsername);
+router.route("/user/:username").post(getUserByUsername); //authenticateUser, accessUserDetails,
 
 module.exports = router;

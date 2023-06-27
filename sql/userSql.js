@@ -1,9 +1,15 @@
 //USER QUERIES
-const getUserByUsername = `SELECT username, password, email, active, user_group.userGroupName AS userGroupName FROM accounts INNER JOIN user_group on accounts.userGroupName = user_group.userGroupName WHERE username = ?;`;
+const getUserByUsername = `SELECT accounts.username, password, email, accounts_usergroups.userGroupName as userGroupName, active FROM accounts INNER JOIN accounts_usergroups on accounts.username = accounts_usergroups.username WHERE accounts.username = ?;`;
 
-const getAllUsers = `SELECT username, password, email, active, user_group.userGroupName AS userGroupName FROM accounts INNER JOIN user_group on accounts.userGroupName = user_group.userGroupName`;
+const getAllUsers = `SELECT accounts.username, password, email, accounts_usergroups.userGroupName as userGroupName, active FROM accounts INNER JOIN accounts_usergroups on accounts.username = accounts_usergroups.username`;
 
-const createUser = `INSERT INTO accounts (username, password, email, active, userGroupName) values (?, ?, ?, ?, ?);`;
+// const getAllUsers = `SELECT accounts.username, password, email, active FROM accounts`;
+
+const getAllUserGroupMappings = `SELECT username, userGroupName FROM accounts_usergroups`;
+
+const createUser = `INSERT INTO accounts (username, password, email, active) values (?, ?, ?, ?);`;
+
+const createUserWithGroups = `INSERT INTO accounts_usergroups (username, userGroupName) VALUES `;
 
 const deleteUser = `DELETE FROM accounts WHERE username = ?;`;
 
@@ -15,4 +21,4 @@ const deactivateUser = `UPDATE accounts SET active = "inactive" WHERE username =
 
 const activateUser = `UPDATE accounts SET active = "active" WHERE username = ?`;
 
-module.exports = { createUser, getAllUsers, getUserByUsername, deleteUser, updateUserIncludingPassword, updateUserExcludingPassword, deactivateUser, activateUser };
+module.exports = { createUser, getAllUsers, getUserByUsername, deleteUser, updateUserIncludingPassword, updateUserExcludingPassword, deactivateUser, activateUser, createUserWithGroups, getAllUserGroupMappings };

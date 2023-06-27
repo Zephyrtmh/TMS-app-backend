@@ -1,4 +1,3 @@
-const authService = require("../services/authenticationService");
 const User = require("../models/User");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const UserRepository = require("../Repository/UserRepository");
@@ -20,12 +19,7 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
         //validate query results to only return 1 user
         res.status(401).json({
             success: false,
-            reason: "User does not exist",
-        });
-    } else if (rows.length > 1) {
-        res.status(401).json({
-            success: false,
-            reason: "More than one user with username exist. Check with admin",
+            reason: "Username or password is incorrect.",
         });
     } else if (rows[0].active === "inactive") {
         res.status(401).json({
@@ -51,12 +45,14 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
         const browserType = req.headers["user-agent"];
         const jwToken = await authUtils.generateJWToken(rows[0].username, ipAddress, browserType);
         console.log(expirationDate);
-        res.status(200).cookie("jwToken", jwToken, cookieOptions).json({
-            success: true,
-            username: rows[0].username,
-            userGroup: rows[0].userGroupName,
-            active: rows[0].active,
-        });
+        res.status(200)
+            .cookie("jwToken", jwToken, cookieOptions)
+            .json({
+                success: true,
+                username: rows[0].username,
+                userGroups: rows.map((row) => row.userGroupName),
+                active: rows[0].active,
+            });
     } else {
         const jwToken = "";
         res.status(401).json({
