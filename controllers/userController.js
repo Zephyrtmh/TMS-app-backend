@@ -7,7 +7,7 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     var userRepository = new UserRepository();
 
     //create User Model
-    var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroupNames);
+    var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroups);
 
     try {
         var results = await userRepository.createUser(userToAdd);
@@ -97,16 +97,23 @@ module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
+    console.log("update user hit");
     var username = req.params.username;
     var password = req.body.password;
     var email = req.body.email;
     var active = req.body.active;
-    var userGroup = req.body.userGroup;
+    var userGroups = req.body.userGroups;
 
-    var user = new User(username, password, email, active, userGroup);
-
+    var user = new User(username, password, email, active, userGroups);
+    console.log("before calling updateUser");
+    console.log(user);
     var userRepository = new UserRepository();
-    var userUpdated = await userRepository.updateUser(user, req.body.changePassword);
+    try {
+        var userUpdated = await userRepository.updateUser(user);
+    } catch (err) {
+        console.log(err);
+    }
+
     var numberUsersUpdated = userUpdated[0].affectedRows;
 
     res.status(200).json({

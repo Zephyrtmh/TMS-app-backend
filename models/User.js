@@ -1,10 +1,10 @@
 class User {
-    constructor(username, password, email, active, userGroupNames) {
+    constructor(username, password, email, active, userGroups) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.active = active;
-        this.userGroupNames = userGroupNames;
+        this.userGroups = userGroups;
     }
 }
 

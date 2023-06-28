@@ -26,7 +26,7 @@ dotenv.config({ path: "./config/config.env" });
 const authenticationRoutes = require("./routes/authentication");
 
 app.use(authenticationRoutes);
-app.use(errorMiddleware);
+// app.use(errorMiddleware);
 app.use(userRoutes);
 app.use(groupRoutes);
 

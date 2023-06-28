@@ -9,7 +9,11 @@ module.exports.authenticateUser = catchAsyncErrors(async (req, res, next) => {
     console.log(req.cookies);
     console.log(jwToken);
     if (!jwToken) {
-        throw new ErrorHandler("Login to access this feature", 401);
+        let err = new ErrorHandler("Login to access this feature", 401);
+        res.status(401).json({
+            success: false,
+            message: "Login to access this feature",
+        });
     }
     var username = await verifyJWToken(jwToken);
     if (username) {
