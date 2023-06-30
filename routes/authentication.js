@@ -3,7 +3,7 @@ const { authenticateUser } = require("../middlewares/jwtAuthenticate");
 const express = require("express");
 const router = express.Router();
 
-const { loginUser, logoutUser, verifyUser } = require("../controllers/authenticationContoller");
+const { loginUser, logoutUser, verifyUser } = require("../controllers/authenticationController");
 
 router.route("/login").post(loginUser);
 router.route("/logout").post(logoutUser);

@@ -5,6 +5,7 @@ const UserRepository = require("../Repository/UserRepository");
 
 module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     var userRepository = new UserRepository();
+    console.log(req.body);
 
     //create User Model
     var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroups);
@@ -12,11 +13,11 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     try {
         var results = await userRepository.createUser(userToAdd);
     } catch (err) {
-        res.status(err.statusCode).json({
-            success: false,
-            reason: err.message,
-        });
-        return next(err);
+        // res.status(err.statusCode).json({
+        //     success: false,
+        //     reason: err.message,
+        // });
+        next(err);
     }
 
     /* data format returned by createUser()
@@ -27,13 +28,13 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
         createdMappings: userGroupsMapCreated, -> nuber of groups added to accounts_usergroups
     };
     */
-    console.log(results);
 
     if (results.createdUser === 0) {
-        res.status(422).json({
-            success: false,
-            reason: "Something went wrong. User was not created.",
-        });
+        // res.status(422).json({
+        //     success: false,
+        //     reason: "Something went wrong. User was not created.",
+        // });
+        throw new ErrorHandler("Something went wrong. User was not created.", 422);
     }
     res.status(200).json({
         success: true,
@@ -47,7 +48,6 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 module.exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
     var userRepository = new UserRepository();
     var users = await userRepository.getAllUsers();
-    console.log(users);
     res.status(200).send(users);
 });
 
@@ -98,6 +98,7 @@ module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
 
 module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     console.log("update user hit");
+    console.log(req.body);
     var username = req.params.username;
     var password = req.body.password;
     var email = req.body.email;
@@ -105,13 +106,12 @@ module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     var userGroups = req.body.userGroups;
 
     var user = new User(username, password, email, active, userGroups);
-    console.log("before calling updateUser");
     console.log(user);
     var userRepository = new UserRepository();
     try {
         var userUpdated = await userRepository.updateUser(user);
     } catch (err) {
-        console.log(err);
+        next(err);
     }
 
     var numberUsersUpdated = userUpdated[0].affectedRows;

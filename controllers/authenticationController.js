@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     var username = req.body.username;
     var password = req.body.password;
+    console.log("attempting to login");
 
     const userRepository = new UserRepository();
 
@@ -53,11 +54,12 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
             userGroups: rows.userGroups,
             active: rows.active,
         });
+        next();
     } else {
         const jwToken = "";
         res.status(401).json({
             success: false,
-            reason: "Incorrect password. Please try again with a different password",
+            reason: "Username or password is incorrect.",
         });
     }
 });
@@ -69,6 +71,7 @@ module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
+    console.log("verifyUser ran");
     /*
     body: {
         userGroupsPermited: ["admin", "project lead"] --> if empty, all users permitted (check for active and matching jwt)
@@ -85,24 +88,26 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     const currIpAddress = req.ip;
     const currBrowserType = req.headers["user-agent"];
 
-    const currUsername = req.body.username;
+    const currUsername = req.body.verification.username;
+    const isEndPoint = req.body.verification.isEndPoint;
+    console.log(isEndPoint);
+    console.log(JSON.stringify(req.body.verification));
+    const userGroupsPermitted = req.body.verification.userGroupsPermitted;
+
+    console.log(userGroupsPermitted);
 
     var noUsernameNeeded = false;
 
     //for when react app refresh - username is null but check the rest
-    if (req.body.username === "") {
+    if (req.body.verification.username === "") {
         noUsernameNeeded = true;
     }
-    console.log(noUsernameNeeded);
-
-    console.log("jwtIP: " + jwtIpAddress + "currIP: " + currIpAddress);
-    console.log("JWTbrowserType: " + jwtBrowserType + " currBrowserType: " + currBrowserType);
-
+    console.log("currUserName: " + currUsername);
+    console.log("jwtUsername: " + jwtUsername);
+    console.log("noUsernameNeeded: " + noUsernameNeeded);
+    console.log(currUsername !== jwtUsername && !noUsernameNeeded);
     if (jwtIpAddress !== currIpAddress || jwtBrowserType !== currBrowserType || (currUsername !== jwtUsername && !noUsernameNeeded)) {
-        console.log(noUsernameNeeded);
-        console.log(jwtBrowserType === currBrowserType);
-        res.status(401).json({ verified: false, reason: "JWT does not match current system." });
-        return next();
+        throw new ErrorHandler("JWT does not match current system.", 401);
     }
 
     const userRepository = new UserRepository();
@@ -114,23 +119,25 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     }
 
     if (user.active !== "active") {
-        res.status(401).json({ verified: false, reason: "User is deactived. Contact an admin." });
-        return;
+        throw new ErrorHandler("User is deactived. Contact an admin.", 401);
     }
 
-    const userGroupsPermitted = req.body.userGroupsPermitted;
-
     console.log(userGroupsPermitted);
+
     if (userGroupsPermitted.length !== 0) {
         if (user.userGroups.length === 0) {
-            res.status(401).json({ verified: false, reason: "Access denied." });
+            throw new ErrorHandler("Access denied.", 401);
+            // res.status(401).json({ verified: false, reason: "Access denied." });
             return;
         } else if (!user.userGroups.some((userGroup) => userGroupsPermitted.includes(userGroup))) {
-            res.status(401).json({ verified: false, reason: "Access denied." });
+            throw new ErrorHandler("Access denied.", 401);
             return;
         }
     }
-
     //TODO - (1) check if user is still active, (1) check if user-group matches
-    res.status(200).json({ verifed: true, user: user });
+    if (isEndPoint) {
+        res.status(200).json({ verifed: true, user: user });
+    } else {
+        next();
+    }
 });

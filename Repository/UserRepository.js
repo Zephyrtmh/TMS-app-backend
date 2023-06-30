@@ -13,48 +13,56 @@ class UserRepository {
             throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.", 400);
         }
 
-        var userGroups = user.userGroups;
+        // var userGroups = user.userGroups;
 
-        const usernameUserGroupPairs = userGroups.map((userGroup) => {
-            return [user.username, userGroup];
-        });
+        // const usernameUserGroupPairs = userGroups.map((userGroup) => {
+        //     return [user.username, userGroup];
+        // });
 
         var hashedPassword = await authUtils.hashPassword(user.password);
 
         try {
-            //add user into ACCOUNTS table
             var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active]);
-            if (user.userGroups.length !== 0) {
-                //map username to usergroups in ACCOUNTS_USERGROUPS table
-                const queryWildCards = usernameUserGroupPairs.map(() => "(?, ?)").join(", ");
+        } catch (err) {
+            throw new ErrorHandler(err.message, 400);
+        }
+        //add user into ACCOUNTS table
 
-                var query = userSql.createUserWithGroups + queryWildCards;
-                var usernameUserGroupPairsflattened = [].concat(...usernameUserGroupPairs);
+        try {
+            // if (user.userGroups.length !== 0) {
+            //     //map username to usergroups in ACCOUNTS_USERGROUPS table
+            //     const queryWildCards = usernameUserGroupPairs.map(() => "(?, ?)").join(", ");
 
-                //add mappings into ACCOUNTS_USERGROUPS table
-                var userGroupsMapped = await connection.execute(query, usernameUserGroupPairsflattened);
+            //     var query = userSql.createUserWithGroups + queryWildCards;
+            //     var usernameUserGroupPairsflattened = [].concat(...usernameUserGroupPairs);
 
-                var usersCreated = userCreated[0].affectedRows;
-                var userGroupsMapCreated = userGroupsMapped[0].affectedRows;
+            //     //add mappings into ACCOUNTS_USERGROUPS table
+            //     var userGroupsMapped = await connection.execute(query, usernameUserGroupPairsflattened);
+            //     console.log(userGroupsMapped);
+            //     var usersCreated = userCreated[0].affectedRows;
+            //     var userGroupsMapCreated = userGroupsMapped[0].affectedRows;
 
-                var data = {
-                    success: true,
-                    username: user.username,
-                    createdUser: usersCreated,
-                    createdMappings: userGroupsMapCreated,
-                };
-            } else {
-                var data = {
-                    success: true,
-                    username: user.username,
-                    createdUser: usersCreated,
-                };
+            //     var data = {
+            //         success: true,
+            //         username: user.username,
+            //         createdUser: usersCreated,
+            //         createdMappings: userGroupsMapCreated,
+            //     };
+            // } else {
+            //     var data = {
+            //         success: true,
+            //         username: user.username,
+            //         createdUser: usersCreated,
+            //     };
+            // }
+            if (!user.userGroups && user.userGroups.length !== 0) {
+                this.addUsergroupMappings(user);
             }
         } catch (err) {
             //TODO: handle error
-            console.log(err);
+            throw new ErrorHandler(err.message, 400);
         }
-        return data;
+        return userCreated;
     }
 
     async deleteUser(username) {
@@ -86,10 +94,9 @@ class UserRepository {
 
     async updateUser(user) {
         let changePassword = true;
+        console.log(JSON.stringify(user));
         console.log("In updateUser");
-        console.log(user);
         var existingUser = await this.getUserByUsername(user.username);
-        console.log(existingUser);
 
         if (existingUser.length == 0) {
             throw new ErrorHandler("User does not exist. Choose a different user to update.", 404);
@@ -111,8 +118,7 @@ class UserRepository {
             try {
                 var userUpdated = await connection.execute(userSql.updateUserExcludingPassword, [user.email, user.active, user.username]);
             } catch (err) {
-                console.log("failed to execute updateUserExcludingPassword");
-                console.error(err.message);
+                throw new ErrorHandler("failed to execute updateUserExcludingPassword", 400);
             }
         } else {
             const newPassword = await authUtils.hashPassword(user.password);
@@ -122,8 +128,7 @@ class UserRepository {
         try {
             var userGroupMappingsDeleted = await connection.execute(userSql.deleteUsergroupMappingsOfUser, [user.username]);
         } catch (err) {
-            console.log("failed to execute deleteUsergroupMappingsOfUser");
-            console.error(err.message);
+            throw new ErrorHandler("failed to execute deleteUsergroupMappingsOfUser", 400);
         }
 
         if (user.userGroups.length !== 0) {
@@ -163,7 +168,6 @@ class UserRepository {
         }, []);
 
         const finalUsersData = Object.values(formattedUsers);
-        console.log(finalUsersData);
         return finalUsersData;
     }
 
@@ -204,9 +208,7 @@ class UserRepository {
 
         //add mappings into ACCOUNTS_USERGROUPS table
         var userGroupsMapped = await connection.execute(query, usernameUserGroupPairsflattened);
-
-        console.log(userGroupsMapped);
-        return;
+        return userGroupsMapped;
     }
 }
 

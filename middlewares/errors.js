@@ -1,4 +1,5 @@
 module.exports = (err, req, res, next) => {
+    //default error code and message
     err.statusCode = err.statusCode || 500;
     err.message = err.message || "Internal Server Error";
 
@@ -9,9 +10,7 @@ module.exports = (err, req, res, next) => {
             errorMessage: err.message,
             stack: err.stack,
         });
-    }
-
-    if (process.env.NODE_ENV === "production") {
+    } else if (process.env.NODE_ENV === "production") {
         let error = { ...err };
         error.message = err.message;
 

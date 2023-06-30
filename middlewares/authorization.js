@@ -11,13 +11,12 @@ module.exports.accessUserDetails = catchAsyncErrors(async (req, res, next) => {
         username: username
     }
     */
-    var username = req.body.username;
+    var username = req.body.verification.username;
 
     const userRepository = new UserRepository();
     //verify user details
     var user = await userRepository.getUserByUsername(username);
     //to access user details either userGroup = admin or trying to access own user profile
-    console.log(user[0]);
     if (checkGroup(user[0].username, "admin")) {
         return next();
     } else if (user[0][0].username === req.params.username) {

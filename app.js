@@ -3,7 +3,9 @@ const app = express();
 const errorMiddleware = require("./middlewares/errors");
 const userRoutes = require("./routes/user");
 const groupRoutes = require("./routes/group");
-const ErrorHandler = require("./utils/errorHandler");
+const ErrorHandler = require("./Utils/ErrorHandler");
+//authentication routes
+const authenticationRoutes = require("./routes/authentication");
 
 const cookieParser = require("cookie-parser");
 
@@ -22,13 +24,11 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config/config.env" });
 
-//authentication routes
-const authenticationRoutes = require("./routes/authentication");
-
 app.use(authenticationRoutes);
 // app.use(errorMiddleware);
 app.use(userRoutes);
 app.use(groupRoutes);
+app.use(errorMiddleware);
 
 app.all("*", (req, res, next) => {
     next(new ErrorHandler(`${req.originalUrl} route not found`, 404));
