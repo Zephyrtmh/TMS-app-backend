@@ -25,4 +25,18 @@ const deactivateUser = `UPDATE accounts SET active = "inactive" WHERE username =
 
 const activateUser = `UPDATE accounts SET active = "active" WHERE username = ?`;
 
-module.exports = { createUser, getAllUsers, getUserByUsername, getAccountByUsername, deleteUser, updateUserIncludingPassword, updateUserExcludingPassword, deactivateUser, activateUser, createUserWithGroups, getAllUserGroupMappings, deleteUsergroupMappingsOfUser, getUserGroupMappingsByUsername };
+module.exports = {
+    createUser,
+    getAllUsers,
+    getUserByUsername,
+    getAccountByUsername,
+    deleteUser,
+    updateUserIncludingPassword,
+    updateUserExcludingPassword,
+    deactivateUser,
+    activateUser,
+    createUserWithGroups,
+    getAllUserGroupMappings,
+    deleteUsergroupMappingsOfUser,
+    getUserGroupMappingsByUsername,
+};

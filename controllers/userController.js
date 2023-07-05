@@ -4,6 +4,7 @@ const ErrorHandler = require("../Utils/ErrorHandler");
 const UserRepository = require("../Repository/UserRepository");
 
 module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
+    console.log("creating user");
     var userRepository = new UserRepository();
     console.log(req.body);
 
@@ -13,27 +14,10 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     try {
         var results = await userRepository.createUser(userToAdd);
     } catch (err) {
-        // res.status(err.statusCode).json({
-        //     success: false,
-        //     reason: err.message,
-        // });
         next(err);
     }
 
-    /* data format returned by createUser()
-    var data = {
-        success: true,
-        username: user.username,
-        createdUser: usersCreated, -> number of users created
-        createdMappings: userGroupsMapCreated, -> nuber of groups added to accounts_usergroups
-    };
-    */
-
     if (results.createdUser === 0) {
-        // res.status(422).json({
-        //     success: false,
-        //     reason: "Something went wrong. User was not created.",
-        // });
         throw new ErrorHandler("Something went wrong. User was not created.", 422);
     }
     res.status(200).json({
@@ -46,6 +30,7 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
+    console.log("get all user is run");
     var userRepository = new UserRepository();
     var users = await userRepository.getAllUsers();
     res.status(200).send(users);
@@ -97,16 +82,16 @@ module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
-    console.log("update user hit");
-    console.log(req.body);
+    console.log("update user is run");
     var username = req.params.username;
     var password = req.body.password;
     var email = req.body.email;
     var active = req.body.active;
     var userGroups = req.body.userGroups;
 
+    console.log("password ", password);
+
     var user = new User(username, password, email, active, userGroups);
-    console.log(user);
     var userRepository = new UserRepository();
     try {
         var userUpdated = await userRepository.updateUser(user);
@@ -115,7 +100,6 @@ module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     }
 
     var numberUsersUpdated = userUpdated[0].affectedRows;
-
     res.status(200).json({
         success: true,
         updated: username,

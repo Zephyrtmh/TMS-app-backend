@@ -8,18 +8,10 @@ const { accessUserDetails } = require("../middlewares/authorization");
 
 router.route("/user/:username").put(verifyUser, accessUserDetails, updateUser);
 router.route("/user/create").post(verifyUser, createUser);
-router.route("/user/delete").post(authenticateUser, deleteUser);
-router.route("/user/deactivate").post(authenticateUser, deactivateUser);
-router.route("/user/activate").post(authenticateUser, activateUser);
-router.route("/user/all").get(authenticateUser, getAllUsers);
-// router.route("/user/:username").post(
-//     authenticateUser,
-//     (req, res, next) => {
-//         authorizeForUserGroups(req, res, next, ["admin"]);
-//     },
-//     accessUserDetails,
-//     getUserByUsername
-// );
+// router.route("/user/delete").post(verifyUser, deleteUser);
+router.route("/user/deactivate").post(verifyUser, deactivateUser);
+router.route("/user/activate").post(verifyUser, activateUser);
+router.route("/user/all").post(verifyUser, getAllUsers);
 router.route("/user/:username").post(getUserByUsername); //authenticateUser, accessUserDetails,
 
 module.exports = router;

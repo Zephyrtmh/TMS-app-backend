@@ -1,7 +1,5 @@
 const catchAsyncErrors = require("./catchAsyncErrors");
-const jsonwebtoken = require("jsonwebtoken");
 const ErrorHandler = require("../Utils/ErrorHandler");
-const { verifyJWToken } = require("../Utils/AuthUtils");
 const UserRepository = require("../Repository/UserRepository");
 const { checkGroup } = require("../Utils/AuthorizationUtils");
 
@@ -25,16 +23,3 @@ module.exports.accessUserDetails = catchAsyncErrors(async (req, res, next) => {
         throw new ErrorHandler("Not Authorized to view this user profile", 401);
     }
 });
-
-// module.exports.authorizeForUserGroups = catchAsyncErrors(async (req, res, next, authorizedUserGroups) => {
-//     var userGroup = req.body.userGroup;
-//     var verifyUserGroup = await checkGroup(req.body.username, req.body.userGroup);
-//     if (!verifyUserGroup) {
-//         return next(new ErrorHandler("User Group provided does not match database.", 401));
-//     }
-//     if (!authorizedUserGroups.includes(userGroup)) {
-//         return next(new ErrorHandler("User not authorized to access this route.", 401));
-//     } else {
-//         next();
-//     }
-// });

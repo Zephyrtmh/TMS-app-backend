@@ -5,6 +5,7 @@ const ErrorHandler = require("../Utils/ErrorHandler");
 
 const authUtils = require("../Utils/AuthUtils");
 const jwt = require("jsonwebtoken");
+const { checkGroup } = require("../Utils/AuthorizationUtils");
 
 module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     var username = req.body.username;
@@ -16,7 +17,6 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     //get user with same username
     var [rows, fields] = await userRepository.getUserByUsername(username);
 
-    console.log(rows);
     //check that User is active
     if (!rows) {
         //validate query results to only return 1 user
@@ -27,7 +27,7 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     } else if (rows.active === "inactive") {
         res.status(401).json({
             success: false,
-            reason: "User is deactivated. Please contact your admin",
+            reason: "Username or password is incorrect.",
         });
     }
 
@@ -71,14 +71,18 @@ module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
-    console.log("verifyUser ran");
     /*
     body: {
         userGroupsPermited: ["admin", "project lead"] --> if empty, all users permitted (check for active and matching jwt)
     }
     */
     const jwToken = req.cookies.jwToken;
-    const jwtContent = await authUtils.verifyJWToken(jwToken);
+    try {
+        var jwtContent = await authUtils.verifyJWToken(jwToken);
+    } catch (err) {
+        throw err;
+    }
+
     //information stored in JWT
     const jwtIpAddress = jwtContent.ipAddress;
     const jwtUsername = jwtContent.username;
@@ -90,11 +94,7 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
 
     const currUsername = req.body.verification.username;
     const isEndPoint = req.body.verification.isEndPoint;
-    console.log(isEndPoint);
-    console.log(JSON.stringify(req.body.verification));
     const userGroupsPermitted = req.body.verification.userGroupsPermitted;
-
-    console.log(userGroupsPermitted);
 
     var noUsernameNeeded = false;
 
@@ -102,10 +102,6 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     if (req.body.verification.username === "") {
         noUsernameNeeded = true;
     }
-    console.log("currUserName: " + currUsername);
-    console.log("jwtUsername: " + jwtUsername);
-    console.log("noUsernameNeeded: " + noUsernameNeeded);
-    console.log(currUsername !== jwtUsername && !noUsernameNeeded);
     if (jwtIpAddress !== currIpAddress || jwtBrowserType !== currBrowserType || (currUsername !== jwtUsername && !noUsernameNeeded)) {
         throw new ErrorHandler("JWT does not match current system.", 401);
     }
@@ -122,17 +118,18 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
         throw new ErrorHandler("User is deactived. Contact an admin.", 401);
     }
 
-    console.log(userGroupsPermitted);
-
     if (userGroupsPermitted.length !== 0) {
         if (user.userGroups.length === 0) {
             throw new ErrorHandler("Access denied.", 401);
-            // res.status(401).json({ verified: false, reason: "Access denied." });
-            return;
-        } else if (!user.userGroups.some((userGroup) => userGroupsPermitted.includes(userGroup))) {
-            throw new ErrorHandler("Access denied.", 401);
-            return;
+        } else {
+            var isPermitted = await userIsPermitted(user.username, userGroupsPermitted);
+            if (!isPermitted) {
+                throw new ErrorHandler("Access denied.", 401);
+            }
         }
+        // else if (!user.userGroups.some((userGroup) => userGroupsPermitted.includes(userGroup))) {
+        //     throw new ErrorHandler("Access denied.", 401);
+        // }
     }
     //TODO - (1) check if user is still active, (1) check if user-group matches
     if (isEndPoint) {
@@ -141,3 +138,13 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
         next();
     }
 });
+
+const userIsPermitted = async (username, userGroupsPermitted) => {
+    for (let groupPermitted of userGroupsPermitted) {
+        var inGroup = await checkGroup(username, groupPermitted);
+        if (inGroup) {
+            return true;
+        }
+    }
+    return false;
+};

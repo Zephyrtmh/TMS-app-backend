@@ -8,54 +8,22 @@ class UserRepository {
     async createUser(user) {
         var existingUser = await this.getUserByUsername(user.username);
         if (existingUser.length > 0) {
-            throw new ErrorHandler("Username already exists. Try signing in or using a different username.", 422);
+            throw new ErrorHandler("Username already exists. Try using a different username.", 422);
         } else if (!authUtils.validatePassword(user.password)) {
-            throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters.", 400);
+            throw new ErrorHandler("Password does not pass the validation. Password should contain letters, numbers and special characters. Passwords should also be between 8 and 10 characters.", 400);
         }
-
-        // var userGroups = user.userGroups;
-
-        // const usernameUserGroupPairs = userGroups.map((userGroup) => {
-        //     return [user.username, userGroup];
-        // });
 
         var hashedPassword = await authUtils.hashPassword(user.password);
 
+        //add new user to ACCOUNTS table
         try {
             var userCreated = await connection.execute(userSql.createUser, [user.username, hashedPassword, user.email, user.active]);
         } catch (err) {
             throw new ErrorHandler(err.message, 400);
         }
-        //add user into ACCOUNTS table
 
         try {
-            // if (user.userGroups.length !== 0) {
-            //     //map username to usergroups in ACCOUNTS_USERGROUPS table
-            //     const queryWildCards = usernameUserGroupPairs.map(() => "(?, ?)").join(", ");
-
-            //     var query = userSql.createUserWithGroups + queryWildCards;
-            //     var usernameUserGroupPairsflattened = [].concat(...usernameUserGroupPairs);
-
-            //     //add mappings into ACCOUNTS_USERGROUPS table
-            //     var userGroupsMapped = await connection.execute(query, usernameUserGroupPairsflattened);
-            //     console.log(userGroupsMapped);
-            //     var usersCreated = userCreated[0].affectedRows;
-            //     var userGroupsMapCreated = userGroupsMapped[0].affectedRows;
-
-            //     var data = {
-            //         success: true,
-            //         username: user.username,
-            //         createdUser: usersCreated,
-            //         createdMappings: userGroupsMapCreated,
-            //     };
-            // } else {
-            //     var data = {
-            //         success: true,
-            //         username: user.username,
-            //         createdUser: usersCreated,
-            //     };
-            // }
-            if (!user.userGroups && user.userGroups.length !== 0) {
+            if (user.userGroups && user.userGroups.length !== 0) {
                 this.addUsergroupMappings(user);
             }
         } catch (err) {
@@ -94,8 +62,12 @@ class UserRepository {
 
     async updateUser(user) {
         let changePassword = true;
-        console.log(JSON.stringify(user));
-        console.log("In updateUser");
+        if (user.username === "admin" && user.active === "inactive") {
+            throw new ErrorHandler("admin user cannot be set to inactive.", 400);
+        } else if (user.username === "admin" && !user.userGroups.includes("admin")) {
+            throw new ErrorHandler("admin usergroup cannot be removed from admin", 400);
+        }
+
         var existingUser = await this.getUserByUsername(user.username);
 
         if (existingUser.length == 0) {
@@ -132,7 +104,7 @@ class UserRepository {
         }
 
         if (user.userGroups.length !== 0) {
-            this.addUsergroupMappings(user);
+            await this.addUsergroupMappings(user);
         }
 
         return userUpdated;

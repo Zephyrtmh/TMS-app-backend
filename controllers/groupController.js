@@ -1,4 +1,5 @@
 const GroupRepository = require("../Repository/GroupRepository");
+const ErrorHandler = require("../Utils/ErrorHandler");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 
 module.exports.getUserGroups = catchAsyncErrors(async (req, res, next) => {
@@ -10,17 +11,23 @@ module.exports.getUserGroups = catchAsyncErrors(async (req, res, next) => {
 module.exports.createUserGroup = catchAsyncErrors(async (req, res, next) => {
     const groupRepository = new GroupRepository();
     try {
-        var userGroup = await groupRepository.createUserGroup(req.body.userGroup);
+        var userGroup = req.body.userGroup;
+        if (userGroup.length > 50) {
+            throw new ErrorHandler("Usergroup cannot be longer than 50 characters.");
+        } else if (userGroup.length === 0) {
+            throw new ErrorHandler("Usergroup cannot be blank");
+        }
+        var userGroup = await groupRepository.createUserGroup(userGroup);
         console.log(userGroup);
         res.status(200).json({
             success: true,
-            userGroup: req.body.userGroup,
+            userGroups: req.body.userGroup,
         });
     } catch (err) {
-        console.log(err.statusCode + err.message);
         if (err.statusCode === 409) {
-            res.status(err.statusCode).json({ success: false, reason: "User Group Exists. Try a different User Group." });
-            return next(err);
+            throw new ErrorHandler("Usergroup already exists.", 409);
+        } else {
+            throw err;
         }
     }
 });

@@ -11,13 +11,20 @@ class GroupRepository {
     }
 
     async createUserGroup(userGroupName) {
-        try {
-            var userGroup = await connection.execute(userGroupSql.createUserGroup, [userGroupName]);
-        } catch (err) {
-            throw new ErrorHandler(err.message, 409);
+        if (userGroupName) {
+            if (userGroupName.trim() === "") {
+                throw new ErrorHandler("User group name cannot empty spaces", 400);
+            }
+            try {
+                var userGroup = await connection.execute(userGroupSql.createUserGroup, [userGroupName]);
+            } catch (err) {
+                console.log(err.message);
+                throw new ErrorHandler(err.message, 409);
+            }
+            return userGroup;
+        } else {
+            throw new ErrorHandler("User group name cannot be blank or spaces", 400);
         }
-        console.log(userGroup);
-        return userGroup;
     }
 }
 
