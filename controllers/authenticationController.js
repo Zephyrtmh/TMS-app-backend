@@ -5,7 +5,7 @@ const ErrorHandler = require("../Utils/ErrorHandler");
 
 const authUtils = require("../Utils/AuthUtils");
 const jwt = require("jsonwebtoken");
-const { checkGroup } = require("../Utils/AuthorizationUtils");
+const { userIsPermitted } = require("../Utils/AuthorizationUtils");
 
 module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     var username = req.body.username;
@@ -109,6 +109,7 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     const userRepository = new UserRepository();
     try {
         var user = await userRepository.getUserByUsername(jwtUsername);
+        console.log(user);
         user = user[0];
     } catch (err) {
         throw new ErrorHandler("Error while getting user by username.", 400);
@@ -138,13 +139,3 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
         next();
     }
 });
-
-const userIsPermitted = async (username, userGroupsPermitted) => {
-    for (let groupPermitted of userGroupsPermitted) {
-        var inGroup = await checkGroup(username, groupPermitted);
-        if (inGroup) {
-            return true;
-        }
-    }
-    return false;
-};

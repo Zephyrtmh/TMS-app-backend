@@ -7,7 +7,10 @@ const Plan = require("../models/Plan");
 module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     const { plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym } = req.body;
 
-    const plan = new Plan(plan_mvp_name, new Date(plan_startdate), new Date(plan_enddate), plan_app_acronym);
+    var colour = appointColour();
+    console.log("colour" + colour);
+
+    const plan = new Plan(plan_mvp_name, new Date(plan_startdate), new Date(plan_enddate), plan_app_acronym, colour);
 
     const planRepository = new PlanRepository();
     const applicationRepository = new ApplicationRepository();
@@ -25,6 +28,7 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
         throw new ErrorHandler("Invalid date. input plan start date not after application start date", 400);
     }
     //invalid enddate
+
     if (!plan.planEndDate < appEndDate) {
         throw new ErrorHandler("Invalid date. input plan end date not before application end date", 400);
     }
@@ -100,3 +104,16 @@ module.exports.updatePlan = catchAsyncErrors(async (req, res, next) => {
         next(err);
     }
 });
+
+const appointColour = () => {
+    //retrieve taken colours
+    const planRepository = new PlanRepository();
+    const takenColours = Object.values(planRepository.getTakenColours());
+
+    const colours = ["#FFC3A0", "#FFD8A8", "#FFECC0", "#FFFAD2", "#D4F2DB", "#B4E8D9", "#A2D4D8", "#C2E0F0", "#C7C7E2", "#DAC3E8", "#F0C8E0", "#F9D0C4", "#F8D9AA", "#FFECB6", "#FFE6A7", "#FAF3C0", "#E4F5B2", "#D8E5A7", "#BEE5BF", "#B5DFE5"];
+
+    difference = colours.filter((item) => !takenColours.includes(item));
+
+    const randomIndex = Math.floor(Math.random() * colours.length);
+    return colours[randomIndex];
+};

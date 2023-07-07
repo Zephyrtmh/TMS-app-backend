@@ -37,6 +37,26 @@ class ApplicationRepository {
         var [application] = await connection.execute(applicationSql.getApplicationByAppAcronym, [acronym]);
         return application[0];
     }
+
+    async getApplicationOpenPermits(app_acronym) {
+        var [permits] = await connection.execute(applicationSql.getApplicationOpenPermits, [app_acronym]);
+        return permits[0];
+    }
+
+    async getApplicationToDoPermits(app_acronym) {
+        var [permits] = await connection.execute(applicationSql.getApplicationToDoPermits, [app_acronym]);
+        return permits[0];
+    }
+
+    async getApplicationDoingPermits(app_acronym) {
+        var [permits] = await connection.execute(applicationSql.getApplicationDoingPermits, [app_acronym]);
+        return permits[0];
+    }
+
+    async getApplicationDonePermits(app_acronym) {
+        var [permits] = await connection.execute(applicationSql.getApplicationDonePermits, [app_acronym]);
+        return permits[0];
+    }
 }
 
 module.exports = ApplicationRepository;

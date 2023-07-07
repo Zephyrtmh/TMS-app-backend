@@ -37,16 +37,32 @@ class TaskRepository {
     }
 
     async getAllTasks() {
-        // Implementation
+        var [tasks] = await connection.execute(taskSql.getAllTasks);
+        return tasks;
     }
 
-    async getTaskByName(taskName) {
-        // Implementation
+    async getTaskById(taskId) {
+        var [task] = await connection.execute(taskSql.getTaskByTaskId, [taskId]);
+        console.log(task);
+        return task[0];
     }
 
     async getTasksByApp(taskAppAcronym) {
         var [tasks] = await connection.execute(taskSql.getTasksByApp, [taskAppAcronym]);
         return tasks;
+    }
+
+    async promoteTask(taskId, newState) {
+        var promoted = await connection.execute(taskSql.promoteTask, [newState, taskId]);
+        return promoted;
+    }
+
+    async addNoteToTask(taskId, note) {
+        //get notes for task
+        var task = await this.getTaskById(taskId);
+        console.log("current notes: " + task.task_notes);
+        var newNote = task.task_notes + "|" + note.content + "|" + note.author + "|" + note.createdate;
+        return newNote;
     }
 }
 

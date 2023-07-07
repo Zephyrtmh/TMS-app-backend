@@ -9,4 +9,22 @@ const updateApplication = " UPDATE applications SET app_description = ?, app_sta
 
 const updateAppRNumber = "UPDATE applications SET app_Rnumber = ? where app_acronym = ?";
 
-module.exports = { createApplication, getApplicationByAppAcronym, updateApplication, getAllApplication, updateAppRNumber };
+const getApplicationOpenPermits = "SELECT app_permit_open FROM applications where app_acronym = ?";
+
+const getApplicationToDoPermits = "SELECT app_permit_todo FROM applications where app_acronym = ?";
+
+const getApplicationDoingPermits = "SELECT app_permit_doing FROM applications where app_acronym = ?";
+
+const getApplicationDonePermits = "SELECT app_permit_done FROM applications where app_acronym = ?";
+
+module.exports = {
+    createApplication,
+    getApplicationByAppAcronym,
+    updateApplication,
+    getAllApplication,
+    updateAppRNumber,
+    getApplicationOpenPermits,
+    getApplicationToDoPermits,
+    getApplicationDoingPermits,
+    getApplicationDonePermits,
+};

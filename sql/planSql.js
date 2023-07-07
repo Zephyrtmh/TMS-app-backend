@@ -7,4 +7,6 @@ const getAllPlans = "SELECT plan_mvp_name, plan_startdate, plan_enddate, plan_ap
 
 const updatePlan = "UPDATE plans SET plan_startdate = ?, plan_enddate = ? WHERE plan_mvp_name = ?;";
 
-module.exports = { createPlan, getPlanByMvpName, updatePlan, getAllPlans };
+const getTakenColours = "SELECT DISTINCT plan_colour FROM plans;";
+
+module.exports = { createPlan, getPlanByMvpName, updatePlan, getAllPlans, getTakenColours };

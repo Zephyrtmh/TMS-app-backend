@@ -28,6 +28,11 @@ class PlanRepository {
         var [plans] = await connection.execute(planSql.getPlanByMvpName, [mvpName]);
         return plans;
     }
+
+    async getTakenColours() {
+        var [takenColours] = await connection.execute(planSql.getTakenColours);
+        return takenColours;
+    }
 }
 
 module.exports = PlanRepository;
