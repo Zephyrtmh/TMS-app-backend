@@ -29,8 +29,8 @@ class PlanRepository {
         return plans;
     }
 
-    async getTakenColours() {
-        var [takenColours] = await connection.execute(planSql.getTakenColours);
+    async getTakenColours(appAccronym) {
+        var [takenColours] = await connection.execute(planSql.getTakenColours, [appAccronym]);
         return takenColours;
     }
 }
