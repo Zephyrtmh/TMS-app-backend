@@ -65,8 +65,14 @@ class TaskRepository {
     async addNoteToTask(taskId, note) {
         //get notes for task
         var task = await this.getTaskById(taskId);
+        var taskNotes = task.task_notes;
         console.log("current notes: " + task.task_notes);
-        var newNote = task.task_notes + "|" + note.content + "|" + note.author + "|" + note.createdate;
+        if (taskNotes) {
+            var newNote = task.task_notes + "|" + note.content + "|" + note.author + "|" + note.createdate;
+        } else {
+            var newNote = note.content + "|" + note.author + "|" + note.createdate;
+        }
+
         return newNote;
     }
 }
