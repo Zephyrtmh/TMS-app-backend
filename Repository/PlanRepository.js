@@ -24,6 +24,11 @@ class PlanRepository {
         return plans;
     }
 
+    async getAllPlansByAppAcronym(appAcronym) {
+        var [plans] = await connection.execute(planSql.getAllPlansByAppAcronym, [appAcronym]);
+        return plans;
+    }
+
     async getPlanByMVPName(mvpName) {
         var [plans] = await connection.execute(planSql.getPlanByMvpName, [mvpName]);
         return plans;

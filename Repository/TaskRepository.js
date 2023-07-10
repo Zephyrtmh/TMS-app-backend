@@ -41,6 +41,11 @@ class TaskRepository {
         return tasks;
     }
 
+    async getAllTasksByAppAcronym(appAcronym) {
+        var [tasks] = await connection.execute(taskSql.getAllTasksByAppAcronym, [appAcronym]);
+        return tasks;
+    }
+
     async getTaskById(taskId) {
         var [task] = await connection.execute(taskSql.getTaskByTaskId, [taskId]);
         console.log(task);

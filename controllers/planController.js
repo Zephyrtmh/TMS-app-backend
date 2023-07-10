@@ -24,12 +24,12 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     console.log("plan_startdate " + plan.planStartDate);
     console.log("plan_enddate " + plan.planEndDate);
     //invalid startdate
-    if (!plan.planStartDate > appStartDate) {
+    if (!(plan.planStartDate > appStartDate)) {
         throw new ErrorHandler("Invalid date. input plan start date not after application start date", 400);
     }
     //invalid enddate
 
-    if (!plan.planEndDate < appEndDate) {
+    if (!(plan.planEndDate < appEndDate)) {
         throw new ErrorHandler("Invalid date. input plan end date not before application end date", 400);
     }
 
@@ -45,9 +45,16 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.getAllPlans = catchAsyncErrors(async (req, res, next) => {
+    const appAcronym = req.query.app;
     const planRepository = new PlanRepository();
-    const plans = await planRepository.getAllPlans();
-    res.status(200).json(plans);
+
+    if (appAcronym) {
+        const plans = await planRepository.getAllPlansByAppAcronym(appAcronym);
+        res.status(200).json(plans);
+    } else {
+        const plans = await planRepository.getAllPlans();
+        res.status(200).json(plans);
+    }
 });
 
 module.exports.getPlanByMVPName = catchAsyncErrors(async (req, res, next) => {

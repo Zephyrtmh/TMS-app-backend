@@ -4,7 +4,7 @@ const Note = require("../models/Note");
 const TaskRepository = require("../Repository/TaskRepository");
 const ApplicationRepository = require("../Repository/ApplicationRepository");
 const ErrorHandler = require("../Utils/ErrorHandler");
-const { userIsPermitted } = require("../Utils/AuthorizationUtils");
+
 const { processStringNotesToArray } = require("../Utils/NotesUtil");
 
 module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
@@ -37,9 +37,15 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.getAllTasks = catchAsyncErrors(async (req, res, next) => {
+    const appAcronym = req.query.app;
     const taskRepository = new TaskRepository();
-    const tasks = await taskRepository.getAllTasks();
-    res.status(200).json(tasks);
+    if (appAcronym) {
+        const tasks = await taskRepository.getAllTasksByAppAcronym(appAcronym);
+        res.status(200).json(tasks);
+    } else {
+        const tasks = await taskRepository.getAllTasks(appAcronym);
+        res.status(200).json(tasks);
+    }
 });
 
 module.exports.getTaskById = catchAsyncErrors(async (req, res, next) => {
@@ -113,84 +119,90 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
+    console.log("ran promoteTask");
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
 
     const { taskId, username } = req.body;
     var permittedUserGroups = "";
     var permitted = false;
-    var task = await taskRepository.getTaskById(taskId);
+    try {
+        var task = await taskRepository.getTaskById(taskId);
+    } catch (err) {
+        throw new ErrorHandler("failed to run getTaskById", 400);
+    }
+
     var appAcronym = task.task_app_acronym;
     var taskState = task.task_state;
-    var newState = "";
-    console.log(taskState);
+    var newState = req.newState;
+    console.log(newState);
 
     //check if user is permitted to promote task
-    switch (taskState) {
-        case "open":
-            try {
-                var permittedUserGroup = (await applicationRepository.getApplicationOpenPermits(appAcronym)).app_permit_open;
-            } catch (err) {
-                throw new ErrorHandler("Error getting permissions for open", 400);
-            }
-            try {
-                permitted = await userIsPermitted(username, [permittedUserGroup]);
-            } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
-            }
-            newState = "todo";
-            break;
-        case "todo":
-            try {
-                var permittedUserGroup = (await applicationRepository.getApplicationToDoPermits(appAcronym)).app_permit_todo;
-                console.log(permittedUserGroup);
-            } catch (err) {
-                throw new ErrorHandler("Error getting permissions for open", 400);
-            }
-            try {
-                permitted = await userIsPermitted(username, [permittedUserGroup]);
-            } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
-            }
-            newState = "doing";
-            break;
-        case "doing":
-            try {
-                var permittedUserGroup = (await applicationRepository.getApplicationDoingPermits(appAcronym)).app_permit_doing;
-            } catch (err) {
-                throw new ErrorHandler("Error getting permissions for open", 400);
-            }
-            try {
-                permitted = await userIsPermitted(username, [permittedUserGroup]);
-            } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
-            }
-            newState = "done";
-            break;
-        case "done":
-            try {
-                var permittedUserGroup = (await applicationRepository.getApplicationDonePermits(appAcronym)).app_permit_done;
-            } catch (err) {
-                throw new ErrorHandler("Error getting permissions for open", 400);
-            }
-            try {
-                permitted = await userIsPermitted(username, [permittedUserGroup]);
-            } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
-            }
-            newState = "closed";
-            break;
-        case "closed":
-            throw new ErrorHandler("Task in closed cannot be promoted.", 400);
-        default:
-            throw new ErrorHandler("Task does not belong to any valid state.", 400);
-    }
-    if (!permitted) {
-        throw new ErrorHandler("user is not permitted to promote this task.", 401);
-    }
+    // switch (taskState) {
+    //     case "open":
+    //         try {
+    //             var permittedUserGroup = (await applicationRepository.getApplicationOpenPermits(appAcronym)).app_permit_open;
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error getting permissions for open", 400);
+    //         }
+    //         try {
+    //             permitted = await userIsPermitted(username, [permittedUserGroup]);
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error check if user is permitted", 400);
+    //         }
+    //         newState = "todo";
+    //         break;
+    //     case "todo":
+    //         try {
+    //             var permittedUserGroup = (await applicationRepository.getApplicationToDoPermits(appAcronym)).app_permit_todo;
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error getting permissions for open", 400);
+    //         }
+    //         try {
+    //             permitted = await userIsPermitted(username, [permittedUserGroup]);
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error check if user is permitted", 400);
+    //         }
+    //         newState = "doing";
+    //         break;
+    //     case "doing":
+    //         try {
+    //             var permittedUserGroup = (await applicationRepository.getApplicationDoingPermits(appAcronym)).app_permit_doing;
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error getting permissions for open", 400);
+    //         }
+    //         try {
+    //             permitted = await userIsPermitted(username, [permittedUserGroup]);
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error check if user is permitted", 400);
+    //         }
+    //         newState = "done";
+    //         break;
+    //     case "done":
+    //         try {
+    //             var permittedUserGroup = (await applicationRepository.getApplicationDonePermits(appAcronym)).app_permit_done;
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error getting permissions for open", 400);
+    //         }
+    //         try {
+    //             permitted = await userIsPermitted(username, [permittedUserGroup]);
+    //         } catch (err) {
+    //             throw new ErrorHandler("Error check if user is permitted", 400);
+    //         }
+    //         newState = "closed";
+    //         break;
+    //     case "closed":
+    //         throw new ErrorHandler("Task in closed cannot be promoted.", 400);
+    //     default:
+    //         throw new ErrorHandler("Task does not belong to any valid state.", 400);
+    // }
+    // if (!permitted) {
+    //     throw new ErrorHandler("user is not permitted to promote this task.", 401);
+    // }
 
     //perform promotion
     try {
+        console.log(taskId, newState);
         var promoted = await taskRepository.promoteTask(taskId, newState);
     } catch (err) {
         throw new ErrorHandler("failed to promote task", 400);

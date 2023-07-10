@@ -77,6 +77,7 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     }
     */
     const jwToken = req.cookies.jwToken;
+    console.log(jwToken);
     try {
         var jwtContent = await authUtils.verifyJWToken(jwToken);
     } catch (err) {
