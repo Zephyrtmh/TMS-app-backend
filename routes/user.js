@@ -7,7 +7,7 @@ const { authenticateUser } = require("../middlewares/jwtAuthenticate");
 const { accessUserDetails } = require("../middlewares/authorization");
 
 router.route("/user/:username").put(verifyUser, accessUserDetails, updateUser);
-router.route("/user/create").post(verifyUser, createUser);
+router.route("/user/create").post(createUser);
 // router.route("/user/delete").post(verifyUser, deleteUser);
 router.route("/user/deactivate").post(verifyUser, deactivateUser);
 router.route("/user/activate").post(verifyUser, activateUser);
