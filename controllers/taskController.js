@@ -40,10 +40,13 @@ module.exports.getAllTasks = catchAsyncErrors(async (req, res, next) => {
     const appAcronym = req.query.app;
     const taskRepository = new TaskRepository();
     if (appAcronym) {
+        console.log("getting all tasks");
         const tasks = await taskRepository.getAllTasksByAppAcronym(appAcronym);
+
         res.status(200).json(tasks);
     } else {
-        const tasks = await taskRepository.getAllTasks(appAcronym);
+        const tasks = await taskRepository.getAllTasks();
+        console.log("getting all tasks");
         res.status(200).json(tasks);
     }
 });
@@ -207,6 +210,38 @@ module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
     } catch (err) {
         throw new ErrorHandler("failed to promote task", 400);
     }
+    console.log("promotion completed");
+
+    res.status(200).json({ success: true, preState: taskState, newState: newState });
+});
+
+module.exports.demoteTask = catchAsyncErrors(async (req, res, next) => {
+    console.log("ran promoteTask");
+    const taskRepository = new TaskRepository();
+    const applicationRepository = new ApplicationRepository();
+
+    const { taskId, username } = req.body;
+    var permittedUserGroups = "";
+    var permitted = false;
+    try {
+        var task = await taskRepository.getTaskById(taskId);
+    } catch (err) {
+        throw new ErrorHandler("failed to run getTaskById", 400);
+    }
+
+    var appAcronym = task.task_app_acronym;
+    var taskState = task.task_state;
+    var newState = req.newState;
+    console.log(newState);
+
+    //perform promotion
+    try {
+        console.log(taskId, newState);
+        var promoted = await taskRepository.promoteTask(taskId, newState);
+    } catch (err) {
+        throw new ErrorHandler("failed to promote task", 400);
+    }
+    console.log("promotion completed");
 
     res.status(200).json({ success: true, preState: taskState, newState: newState });
 });

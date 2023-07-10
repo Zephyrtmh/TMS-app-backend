@@ -36,6 +36,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
     console.log(req.params);
     const taskId = req.body.taskId || req.params.taskId;
     console.log(username, taskId);
+    const action = req.body.action;
 
     var permittedUserGroups = "";
     var permitted = false;
@@ -58,7 +59,13 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             } catch (err) {
                 throw new ErrorHandler("Error check if user is permitted", 400);
             }
-            newState = "todo";
+            if (action) {
+                if (action === "promote") {
+                    newState = "todo";
+                } else if (action === "demote") {
+                    throw new ErrorHandler("task in open state cannot be demoted");
+                }
+            }
             break;
         case "todo":
             try {
@@ -71,7 +78,13 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             } catch (err) {
                 throw new ErrorHandler("Error check if user is permitted", 400);
             }
-            newState = "doing";
+            if (action) {
+                if (action === "promote") {
+                    newState = "doing";
+                } else if (action === "demote") {
+                    throw new ErrorHandler("task in todo state cannot be demoted to open", 400);
+                }
+            }
             break;
         case "doing":
             try {
@@ -84,7 +97,13 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             } catch (err) {
                 throw new ErrorHandler("Error check if user is permitted", 400);
             }
-            newState = "done";
+            if (action) {
+                if (action === "promote") {
+                    newState = "done";
+                } else if (action === "demote") {
+                    newState = "todo";
+                }
+            }
             break;
         case "done":
             try {
@@ -97,7 +116,13 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             } catch (err) {
                 throw new ErrorHandler("Error check if user is permitted", 400);
             }
-            newState = "closed";
+            if (action) {
+                if (action === "promote") {
+                    newState = "closed";
+                } else if (action === "demote") {
+                    newState = "doing";
+                }
+            }
             break;
         case "closed":
             throw new ErrorHandler("Task in closed cannot be promoted.", 400);
