@@ -3,16 +3,17 @@ const Note = require("../models/Note");
 module.exports.processStringNotesToArray = (notesString) => {
     var notesArray = [];
     //notes content|createdBy|createDate|notes content|createdBy|createDate
-    const regex = /([^|]+)\|([^|]+)\|([^|]+)/g;
+    const regex = /([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)/g;
     let match;
     while ((match = regex.exec(notesString))) {
         const content = match[1].trim();
-        const author = match[2].trim();
-        const createdate = match[3].trim();
+        const state = match[2].trim();
+        const author = match[3].trim();
+        const createdate = match[4].trim();
 
-        console.log(content, author, createdate);
+        console.log(content, state, author, createdate);
 
-        var note = new Note(content, author, createdate);
+        var note = new Note(content, state, author, createdate);
 
         notesArray.push(note);
     }

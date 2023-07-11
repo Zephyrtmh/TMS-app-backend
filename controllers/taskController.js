@@ -11,7 +11,7 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
 
-    const { task_name, task_description, task_plan, task_app_acronym, task_creator } = req.body;
+    const { task_name, task_description, task_notes, task_plan, task_app_acronym, task_creator } = req.body;
     var task_state = "open";
     var task_owner = task_creator;
     var application = await applicationRepository.getApplicationByAcronym(task_app_acronym);
@@ -19,11 +19,14 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     var appAcronym = application.app_acronym;
     var task_id = task_app_acronym + "_" + appRnumber;
 
+    var formatted_task_notes = `${task_notes}|${task_state}|${req.body.verification.username}|${new Date().toLocaleString()}`;
+
     //update new appRnumber
     await applicationRepository.updateAppRNumber(parseInt(appRnumber) + 1, appAcronym);
     var task_createdate = new Date();
+    console.log(formatted_task_notes);
 
-    const task = new Task(task_name, task_description, "", task_id, task_plan, task_app_acronym, task_state, task_creator, task_owner, task_createdate);
+    const task = new Task(task_name, task_description, formatted_task_notes, task_id, task_plan, task_app_acronym, task_state, task_creator, task_owner, task_createdate);
 
     try {
         const createdTask = await taskRepository.createTask(task);
@@ -89,7 +92,7 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
     const currDate = new Date();
     const taskRepository = new TaskRepository();
 
-    var note = new Note(task_notes, req.body.verification.username, currDate.toLocaleString());
+    var note = new Note(task_notes, task_state, req.body.verification.username, currDate.toLocaleString());
 
     var newNote = await taskRepository.addNoteToTask(taskId, note);
     console.log(newNote);

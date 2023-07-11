@@ -68,9 +68,9 @@ class TaskRepository {
         var taskNotes = task.task_notes;
         console.log("current notes: " + task.task_notes);
         if (taskNotes) {
-            var newNote = task.task_notes + "|" + note.content + "|" + note.author + "|" + note.createdate;
+            var newNote = task.task_notes + "|" + note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
         } else {
-            var newNote = note.content + "|" + note.author + "|" + note.createdate;
+            var newNote = note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
         }
 
         return newNote;

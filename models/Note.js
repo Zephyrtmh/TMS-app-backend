@@ -1,6 +1,7 @@
 class Note {
-    constructor(content, author, createdate) {
+    constructor(content, state, author, createdate) {
         this.content = content;
+        this.state = state;
         this.author = author;
         this.createdate = createdate;
     }
