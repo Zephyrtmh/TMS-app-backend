@@ -5,7 +5,7 @@ const getPlanByMvpName = "SELECT plan_mvp_name, plan_startdate, plan_enddate, pl
 
 const getAllPlans = "SELECT plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym FROM plans;";
 
-const getAllPlansByAppAcronym = "SELECT plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym FROM plans WHERE plan_app_acronym = ?;";
+const getAllPlansByAppAcronym = "SELECT plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym, plan_colour FROM plans WHERE plan_app_acronym = ?;";
 
 const updatePlan = "UPDATE plans SET plan_startdate = ?, plan_enddate = ? WHERE plan_mvp_name = ?;";
 

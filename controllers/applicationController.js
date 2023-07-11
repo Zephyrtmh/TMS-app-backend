@@ -56,12 +56,13 @@ module.exports.deleteApplication = catchAsyncErrors(async (req, res, next) => {
 
 module.exports.updateApplication = catchAsyncErrors(async (req, res, next) => {
     const { acronym } = req.params;
-    const { app_description, app_Rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done } = req.body;
+    const { app_description, app_startdate, app_enddate, app_permit_create, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done } = req.body;
 
     const updatedApplicationData = {
         app_description,
         app_startdate,
         app_enddate,
+        app_permit_create,
         app_permit_open,
         app_permit_todo,
         app_permit_doing,
