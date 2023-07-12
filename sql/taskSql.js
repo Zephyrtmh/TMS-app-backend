@@ -13,7 +13,7 @@ const updateTask = "UPDATE tasks SET task_name = ?, task_description = ?, task_n
 
 const deleteTask = "DELETE FROM tasks WHERE task_id = ?;";
 
-const promoteTask = "UPDATE tasks SET task_state = ? WHERE task_id = ?";
+const promoteTask = "UPDATE tasks SET task_state = ?, task_notes = ? WHERE task_id = ?";
 
 module.exports = {
     createTask,

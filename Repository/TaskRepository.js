@@ -57,20 +57,35 @@ class TaskRepository {
         return tasks;
     }
 
-    async promoteTask(taskId, newState) {
-        var promoted = await connection.execute(taskSql.promoteTask, [newState, taskId]);
+    async promoteTask(taskId, newState, newNotes) {
+        var promoted = await connection.execute(taskSql.promoteTask, [newState, newNotes, taskId]);
         return promoted;
     }
 
-    async addNoteToTask(taskId, note) {
+    async addNoteToTask(taskId, ...notes) {
         //get notes for task
         var task = await this.getTaskById(taskId);
         var taskNotes = task.task_notes;
         console.log("current notes: " + task.task_notes);
+
         if (taskNotes) {
-            var newNote = task.task_notes + "|" + note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
+            var newNote = taskNotes;
+            for (let note of notes) {
+                if (note.content !== "") {
+                    newNote = newNote + "|" + note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
+                }
+            }
         } else {
-            var newNote = note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
+            var newNote = "";
+            notes.forEach((note, index) => {
+                if (note.content !== "") {
+                    if (index === 0) {
+                        newNote = "|" + note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
+                    } else {
+                        newNote = note.content + "|" + note.state + "|" + note.author + "|" + note.createdate;
+                    }
+                }
+            });
         }
 
         return newNote;
