@@ -104,7 +104,11 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
     var note = new Note(task_notes, task_state, req.body.verification.username, currDate.toLocaleString());
 
     if (task_plan !== oldTask.task_plan) {
-        var note2 = new Note(`${req.body.verification.username} reassigned the plan: ${oldTask.task_plan === "" ? "unassigned" : oldTask.task_plan} -> ${task_plan === "" ? "unassigned" : task_plan}`, task_state, "system", currDate.toLocaleString());
+        if(oldTask.task_plan === "" || oldTask.task_plan === null) {
+            note2 = new Note(`${req.body.verification.username} assigned the task to ${task_plan}`, task_state, "system", currDate.toLocaleString());
+        } else {
+            var note2 = new Note(`${req.body.verification.username} reassigned the plan: ${oldTask.task_plan === "" || oldTask.task_plan === null? "unassigned" : oldTask.task_plan} -> ${task_plan === "" ? "unassigned" : task_plan}`, task_state, "system", currDate.toLocaleString());
+        }
         newNote = await taskRepository.addNoteToTask(taskId, note2, note);
         // var notesDetails = { action: "update", from: task_plan, to: oldTask.task_plan, taskId: taskId };
         // var newNotes = await addSystemGeneratedNote(notesDetails);
