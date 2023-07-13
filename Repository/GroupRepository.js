@@ -18,7 +18,7 @@ class GroupRepository {
             try {
                 var userGroup = await connection.execute(userGroupSql.createUserGroup, [userGroupName]);
             } catch (err) {
-                console.log(err.message);
+                ("");
                 throw new ErrorHandler(err.message, 409);
             }
             return userGroup;

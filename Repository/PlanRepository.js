@@ -8,7 +8,6 @@ class PlanRepository {
     // You can use the User Repository as a reference for writing these methods
     // For example:
     async createPlan(plan) {
-        console.log(plan);
         var planCreated = await connection.execute(planSql.createPlan, Object.values(plan));
         return planCreated;
     }

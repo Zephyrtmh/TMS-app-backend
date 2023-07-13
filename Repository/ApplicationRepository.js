@@ -19,7 +19,7 @@ class ApplicationRepository {
     async updateApplication(acronym, application) {
         var applicationArray = Object.values(application);
         applicationArray.push(acronym);
-        console.log(Object.values(application).push(acronym));
+        .push(acronym));
         return await connection.execute(applicationSql.updateApplication, applicationArray);
     }
 
@@ -28,7 +28,7 @@ class ApplicationRepository {
     }
 
     async getAllApplications() {
-        console.log("get all applications was ran");
+        ;
         var [applications] = await connection.execute(applicationSql.getAllApplication);
         return applications;
     }

@@ -18,7 +18,6 @@ module.exports.createUserGroup = catchAsyncErrors(async (req, res, next) => {
             throw new ErrorHandler("Usergroup cannot be blank");
         }
         var userGroup = await groupRepository.createUserGroup(userGroup);
-        console.log(userGroup);
         res.status(200).json({
             success: true,
             userGroups: req.body.userGroup,

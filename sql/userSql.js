@@ -25,6 +25,8 @@ const deactivateUser = `UPDATE accounts SET active = "inactive" WHERE username =
 
 const activateUser = `UPDATE accounts SET active = "active" WHERE username = ?`;
 
+const getAllUsersAppPermitDone = `SELECT accounts.username, accounts.email  FROM accounts INNER JOIN accounts_usergroups ON accounts.username = accounts_usergroups.username INNER JOIN applications on applications.app_permit_done = accounts_usergroups.userGroupName WHERE app_acronym = ?;`;
+
 module.exports = {
     createUser,
     getAllUsers,
@@ -39,4 +41,5 @@ module.exports = {
     getAllUserGroupMappings,
     deleteUsergroupMappingsOfUser,
     getUserGroupMappingsByUsername,
+    getAllUsersAppPermitDone,
 };

@@ -8,7 +8,7 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     const { plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym } = req.body;
 
     var colour = appointColour(plan_app_acronym);
-    console.log("colour" + colour);
+    ("");
 
     const plan = new Plan(plan_mvp_name, new Date(plan_startdate), new Date(plan_enddate), plan_app_acronym, colour);
 
@@ -19,10 +19,10 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     var application = await applicationRepository.getApplicationByAcronym(plan_app_acronym);
     var appStartDate = application.app_startdate;
     var appEndDate = application.app_enddate;
-    console.log("appstartdate: " + appStartDate);
-    console.log("appEndDate: " + appEndDate);
-    console.log("plan_startdate " + plan.planStartDate);
-    console.log("plan_enddate " + plan.planEndDate);
+    ("");
+    ("");
+    ("");
+    ("");
     //invalid startdate
     if (!(plan.planStartDate > appStartDate)) {
         throw new ErrorHandler("Invalid date. input plan start date not after application start date", 400);

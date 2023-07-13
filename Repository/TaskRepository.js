@@ -8,7 +8,7 @@ class TaskRepository {
     // You can use the User Repository as a reference for writing these methods
     // For example:
     async createTask(task) {
-        console.log(task);
+        "";
         var planCreated = await connection.execute(taskSql.createTask, Object.values(task));
         return planCreated;
     }
@@ -32,7 +32,7 @@ class TaskRepository {
 
         var taskArray = Object.values(task);
         taskArray.push(taskId);
-        console.log(taskArray);
+
         return await connection.execute(taskSql.updateTask, taskArray);
     }
 
@@ -48,7 +48,7 @@ class TaskRepository {
 
     async getTaskById(taskId) {
         var [task] = await connection.execute(taskSql.getTaskByTaskId, [taskId]);
-        console.log(task);
+
         return task[0];
     }
 
@@ -66,7 +66,6 @@ class TaskRepository {
         //get notes for task
         var task = await this.getTaskById(taskId);
         var taskNotes = task.task_notes;
-        console.log("current notes: " + task.task_notes);
 
         if (taskNotes) {
             var newNote = taskNotes;

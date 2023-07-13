@@ -183,8 +183,9 @@ class UserRepository {
         return userGroupsMapped;
     }
 
-    async getAllUsersAppPermitDone() {
-        await connection.execute(query, usernameUserGroupPairsflattened);
+    async getAllUsersAppPermitDone(appAcronym) {
+        var { users } = await connection.execute(userSql.getAllUsersAppPermitDone, [appAcronym]);
+        return users;
     }
 }
 

@@ -28,14 +28,14 @@ module.exports.accessUserDetails = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
-    console.log("ran canEditTask");
+    "";
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
 
     const username = req.body.verification.username;
-    console.log(req.params);
+    ("");
     const taskId = req.body.taskId || req.params.taskId;
-    console.log(username, taskId);
+    ("");
     const action = req.body.action;
 
     var permittedUserGroups = "";
@@ -44,7 +44,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
     var appAcronym = task.task_app_acronym;
     var taskState = task.task_state;
     var newState = "";
-    console.log(taskState);
+    ("");
 
     //check if user is permitted to promote task
     switch (taskState) {

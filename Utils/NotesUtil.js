@@ -11,8 +11,6 @@ module.exports.processStringNotesToArray = (notesString) => {
         const author = match[3].trim();
         const createdate = match[4].trim();
 
-        console.log(content, state, author, createdate);
-
         var note = new Note(content, state, author, createdate);
 
         notesArray.push(note);

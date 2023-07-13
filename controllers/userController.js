@@ -4,9 +4,9 @@ const ErrorHandler = require("../Utils/ErrorHandler");
 const UserRepository = require("../Repository/UserRepository");
 
 module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
-    console.log("creating user");
+    "";
     var userRepository = new UserRepository();
-    console.log(req.body);
+    ("");
 
     //create User Model
     var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroups);
@@ -30,7 +30,7 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
-    console.log("get all user is run");
+    "";
     var userRepository = new UserRepository();
     var users = await userRepository.getAllUsers();
     res.status(200).send(users);
@@ -82,14 +82,14 @@ module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
-    console.log("update user is run");
+    "";
     var username = req.params.username;
     var password = req.body.password;
     var email = req.body.email;
     var active = req.body.active;
     var userGroups = req.body.userGroups;
 
-    console.log("password ", password);
+    ("");
 
     var user = new User(username, password, email, active, userGroups);
     var userRepository = new UserRepository();

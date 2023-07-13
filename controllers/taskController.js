@@ -6,6 +6,8 @@ const ApplicationRepository = require("../Repository/ApplicationRepository");
 const ErrorHandler = require("../Utils/ErrorHandler");
 
 const { processStringNotesToArray } = require("../Utils/NotesUtil");
+const { sendEmail } = require("../Utils/EmailUtil");
+const UserRepository = require("../Repository/UserRepository");
 
 module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     const taskRepository = new TaskRepository();
@@ -65,8 +67,6 @@ module.exports.getTaskById = catchAsyncErrors(async (req, res, next) => {
     if (!task) {
         throw new ErrorHandler(`Task with name '${taskId}' not found.`, 404);
     }
-
-    console.log(processStringNotesToArray(task.task_notes));
 
     res.status(200).json(task);
 });
@@ -142,6 +142,7 @@ module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
     console.log("ran promoteTask");
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
+    const userRepository = new UserRepository();
 
     const { taskId, username } = req.body;
     var permittedUserGroups = "";
@@ -163,6 +164,19 @@ module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
         var newNotes = await addSystemGeneratedNote(notesDetails);
         console.log(newNotes);
         var promoted = await taskRepository.promoteTask(taskId, newState, newNotes);
+        console.log("newState", newState);
+        if (newState === "done") {
+            const user = await userRepository.getUserByUsername(username);
+
+            const recipients = await userRepository.getAllUsersAppPermitDone(appAcronym);
+            console.log("recipients", recipients);
+
+            const emailData = { user: user, task: task, recipients: recipients };
+
+            if (recipients.length !== 0) {
+                await sendEmail(emailData);
+            }
+        }
     } catch (err) {
         throw new ErrorHandler(err.message, 400);
     }

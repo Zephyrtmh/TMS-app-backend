@@ -10,7 +10,7 @@ const { userIsPermitted } = require("../Utils/AuthorizationUtils");
 module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     var username = req.body.username;
     var password = req.body.password;
-    console.log("attempting to login");
+    ("");
 
     const userRepository = new UserRepository();
 
@@ -47,7 +47,7 @@ module.exports.loginUser = catchAsyncErrors(async (req, res, next) => {
         const ipAddress = req.ip;
         const browserType = req.headers["user-agent"];
         const jwToken = await authUtils.generateJWToken(rows.username, ipAddress, browserType);
-        console.log(expirationDate);
+        ("");
         res.status(200).cookie("jwToken", jwToken, cookieOptions).json({
             success: true,
             username: rows.username,
@@ -77,7 +77,7 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     }
     */
     const jwToken = req.cookies.jwToken;
-    console.log(jwToken);
+    ("");
     try {
         var jwtContent = await authUtils.verifyJWToken(jwToken);
     } catch (err) {
@@ -110,7 +110,7 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     const userRepository = new UserRepository();
     try {
         var user = await userRepository.getUserByUsername(jwtUsername);
-        console.log(user);
+        ("");
         user = user[0];
     } catch (err) {
         throw new ErrorHandler("Error while getting user by username.", 400);
