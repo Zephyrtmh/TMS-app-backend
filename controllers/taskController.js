@@ -22,8 +22,10 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     var task_id = task_app_acronym + "_" + appRnumber;
 
     var formatted_task_notes = "";
-    if (task_notes) {
-        formatted_task_notes = `${task_notes}|${task_state}|${req.body.verification.username}|${new Date().toLocaleString()}`;
+    if (task_notes !== "") {
+        formatted_task_notes = `${req.body.verification.username} created the task|${task_state}|system|${new Date().toLocaleString()}|${task_notes}|${task_state}|${req.body.verification.username}|${new Date().toLocaleString()}`;
+    } else {
+        formatted_task_notes = `${req.body.verification.username} created the task|${task_state}|system|${new Date().toLocaleString()}`;
     }
 
     //update new appRnumber
@@ -31,7 +33,7 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     var task_createdate = new Date();
     console.log(formatted_task_notes);
 
-    const task = new Task(task_name, task_description, formatted_task_notes, task_id, task_plan, task_app_acronym, task_state, task_creator, task_owner, task_createdate);
+    const task = new Task(task_name, task_description, formatted_task_notes, task_id, task_plan === "" ? null : task_plan, task_app_acronym, task_state, task_creator, task_owner, task_createdate);
 
     try {
         const createdTask = await taskRepository.createTask(task);
@@ -102,8 +104,8 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
     var note = new Note(task_notes, task_state, req.body.verification.username, currDate.toLocaleString());
 
     if (task_plan !== oldTask.task_plan) {
-        var note2 = new Note(`${req.body.verification.username} reassigned the plan: ${oldTask.task_plan} -> ${task_plan}`, task_state, "system", currDate.toLocaleString());
-        newNote = await taskRepository.addNoteToTask(taskId, note, note2);
+        var note2 = new Note(`${req.body.verification.username} reassigned the plan: ${oldTask.task_plan === "" ? "unassigned" : oldTask.task_plan} -> ${task_plan === "" ? "unassigned" : task_plan}`, task_state, "system", currDate.toLocaleString());
+        newNote = await taskRepository.addNoteToTask(taskId, note2, note);
         // var notesDetails = { action: "update", from: task_plan, to: oldTask.task_plan, taskId: taskId };
         // var newNotes = await addSystemGeneratedNote(notesDetails);
         // const updateResult = await taskRepository.updateTask(updatedTaskData, taskId);
