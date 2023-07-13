@@ -182,6 +182,10 @@ class UserRepository {
         var userGroupsMapped = await connection.execute(query, usernameUserGroupPairsflattened);
         return userGroupsMapped;
     }
+
+    async getAllUsersAppPermitDone() {
+        await connection.execute(query, usernameUserGroupPairsflattened);
+    }
 }
 
 module.exports = UserRepository;
