@@ -6,10 +6,8 @@ const app = express();
 
 // Define a route to send an email
 module.exports.sendEmail = async (info) => {
+    console.log("info", info);
     //retrieve all recipients
-    const userRepository = new UserRepository();
-    userRepository;
-
     const from = "zephinatay@gmail.com";
     var to = "";
     for (let user of info.recipients) {
@@ -29,7 +27,7 @@ module.exports.sendEmail = async (info) => {
         from: from,
         to: to,
         subject: `task promotion notification`,
-        text: `Task ${info.task.task_name} has been completed by ${info.user.username}. For your approval. \n\n THIS IS A SYSTEM GENERATED EMAIL. DO NOT REPLY TO THIS EMAIL.`,
+        text: `Task (${info.task.task_name}) has been completed by ${info.user.username}. For your approval.\n\n**THIS IS A SYSTEM GENERATED EMAIL. DO NOT REPLY TO THIS EMAIL.**`,
     };
 
     console.log("mailOptions", mailOptions);

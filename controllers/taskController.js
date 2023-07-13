@@ -173,7 +173,8 @@ module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
             const recipients = await userRepository.getAllUsersAppPermitDone(appAcronym);
             console.log("recipients", recipients);
 
-            const emailData = { user: user, task: task, recipients: recipients };
+            const emailData = { user: user[0], task: task, recipients: recipients };
+            console.log("emailData", emailData);
 
             if (recipients.length !== 0) {
                 await sendEmail(emailData);

@@ -184,8 +184,11 @@ class UserRepository {
     }
 
     async getAllUsersAppPermitDone(appAcronym) {
-        var { users } = await connection.execute(userSql.getAllUsersAppPermitDone, [appAcronym]);
-        return users;
+        console.log("appAcronym", appAcronym);
+        var users = await connection.execute(userSql.getAllUsersAppPermitDone, [appAcronym]);
+        console.log("users", users);
+
+        return users[0];
     }
 }
 
