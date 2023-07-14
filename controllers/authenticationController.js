@@ -93,6 +93,8 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     const currIpAddress = req.ip;
     const currBrowserType = req.headers["user-agent"];
 
+    console.log("JSON", JSON.stringify(req.body.verification));
+
     const currUsername = req.body.verification.username;
     const isEndPoint = req.body.verification.isEndPoint;
     const userGroupsPermitted = req.body.verification.userGroupsPermitted;
@@ -213,3 +215,7 @@ module.exports.verifyUserWithHeaders = catchAsyncErrors(async (req, res, next) =
         next();
     }
 });
+
+const actionMap = {
+    edituser: [""],
+};
