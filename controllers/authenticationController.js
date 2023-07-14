@@ -140,3 +140,76 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
         next();
     }
 });
+
+module.exports.verifyUserWithHeaders = catchAsyncErrors(async (req, res, next) => {
+    /*
+    body: {
+        userGroupsPermited: ["admin", "project lead"] --> if empty, all users permitted (check for active and matching jwt)
+    }
+    */
+    const jwToken = req.cookies.jwToken;
+    console.log(jwToken);
+    try {
+        var jwtContent = await authUtils.verifyJWToken(jwToken);
+    } catch (err) {
+        throw err;
+    }
+
+    const verificationObject = JSON.parse(req.headers["verification"]);
+
+    //information stored in JWT
+    const jwtIpAddress = jwtContent.ipAddress;
+    const jwtUsername = jwtContent.username;
+    const jwtBrowserType = jwtContent.browserType;
+
+    //information from verfity req
+    const currIpAddress = req.ip;
+    const currBrowserType = req.headers["user-agent"];
+
+    const currUsername = verificationObject.username;
+    const isEndPoint = verificationObject.isEndPoint;
+    const userGroupsPermitted = verificationObject.userGroupsPermitted;
+
+    var noUsernameNeeded = false;
+
+    //for when react app refresh - username is null but check the rest
+    if (verificationObject.username === "") {
+        noUsernameNeeded = true;
+    }
+    if (jwtIpAddress !== currIpAddress || jwtBrowserType !== currBrowserType || (currUsername !== jwtUsername && !noUsernameNeeded)) {
+        throw new ErrorHandler("JWT does not match current system.", 401);
+    }
+
+    const userRepository = new UserRepository();
+    try {
+        var user = await userRepository.getUserByUsername(jwtUsername);
+        console.log(user);
+        user = user[0];
+    } catch (err) {
+        throw new ErrorHandler("Error while getting user by username.", 400);
+    }
+
+    if (user.active !== "active") {
+        throw new ErrorHandler("User is deactived. Contact an admin.", 401);
+    }
+
+    if (userGroupsPermitted.length !== 0) {
+        if (user.userGroups.length === 0) {
+            throw new ErrorHandler("Access denied.", 401);
+        } else {
+            var isPermitted = await userIsPermitted(user.username, userGroupsPermitted);
+            if (!isPermitted) {
+                throw new ErrorHandler("Access denied.", 401);
+            }
+        }
+        // else if (!user.userGroups.some((userGroup) => userGroupsPermitted.includes(userGroup))) {
+        //     throw new ErrorHandler("Access denied.", 401);
+        // }
+    }
+    //TODO - (1) check if user is still active, (1) check if user-group matches
+    if (isEndPoint) {
+        res.status(200).json({ verifed: true, user: user });
+    } else {
+        next();
+    }
+});
