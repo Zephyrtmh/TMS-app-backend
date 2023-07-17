@@ -31,3 +31,8 @@ module.exports.userIsPermitted = async (username, userGroupsPermitted) => {
     }
     return false;
 };
+
+module.exports.setUserGroupsPermitted = (req, userGroupsPermitted) => {
+    console.log("userGroupsPermitted", userGroupsPermitted);
+    req.body.verification.userGroupsPermitted = userGroupsPermitted;
+};

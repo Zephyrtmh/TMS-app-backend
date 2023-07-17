@@ -12,6 +12,7 @@ const UserRepository = require("../Repository/UserRepository");
 module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
+    const userRepository = new UserRepository();
 
     const { task_name, task_description, task_notes, task_plan, task_app_acronym, task_creator } = req.body;
     var task_state = "open";
@@ -20,6 +21,13 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     var appRnumber = application.app_Rnumber;
     var appAcronym = application.app_acronym;
     var task_id = task_app_acronym + "_" + appRnumber;
+
+    //check for app_permit_create of application
+    user = await userRepository.getUserByUsername(req.body.verification.username);
+
+    if (!user[0].userGroups.includes(application.app_permit_create)) {
+        throw new ErrorHandler("User not permitted to create Plan", 401);
+    }
 
     var formatted_task_notes = "";
     if (task_notes !== "") {
@@ -91,23 +99,51 @@ module.exports.deleteTask = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
+    const applicationRepository = new ApplicationRepository();
+    const taskRepository = new TaskRepository();
+    const userRepository = new UserRepository();
+
     const { taskId } = req.params;
     const { task_name, task_description, task_notes, task_plan, task_state, task_creator, task_owner, oldTask } = req.body;
 
-    // newNote = new Note(task_notes.content, task_notes.author, task_notes.createdate);
-
+    const user = await userRepository.getUserByUsername(req.body.verification.username);
+    const task = await taskRepository.getTaskById(taskId);
+    const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);
+    switch (task.task_state) {
+        case "open":
+            if (!user[0].userGroups.includes(application.app_permit_open)) {
+                throw new ErrorHandler("User not permitted to edit this task", 401);
+            }
+            break;
+        case "todo":
+            if (!user[0].userGroups.includes(application.app_permit_todo)) {
+                throw new ErrorHandler("User not permitted to edit this task", 401);
+            }
+            break;
+        case "doing":
+            if (!user[0].userGroups.includes(application.app_permit_doing)) {
+                throw new ErrorHandler("User not permitted to edit this task", 401);
+            }
+            break;
+        case "done":
+            if (!user[0].userGroups.includes(application.app_permit_done)) {
+                throw new ErrorHandler("User not permitted to edit this task", 401);
+            }
+            break;
+        default:
+            throw new ErrorHandler("Task in none of the states", 500);
+    }
     const currDate = new Date();
-    const taskRepository = new TaskRepository();
 
     var newNote = "";
 
     var note = new Note(task_notes, task_state, req.body.verification.username, currDate.toLocaleString());
 
     if (task_plan !== oldTask.task_plan) {
-        if(oldTask.task_plan === "" || oldTask.task_plan === null) {
+        if (oldTask.task_plan === "" || oldTask.task_plan === null) {
             note2 = new Note(`${req.body.verification.username} assigned the task to ${task_plan}`, task_state, "system", currDate.toLocaleString());
         } else {
-            var note2 = new Note(`${req.body.verification.username} reassigned the plan: ${oldTask.task_plan === "" || oldTask.task_plan === null? "unassigned" : oldTask.task_plan} -> ${task_plan === "" ? "unassigned" : task_plan}`, task_state, "system", currDate.toLocaleString());
+            var note2 = new Note(`${req.body.verification.username} reassigned the plan: ${oldTask.task_plan === "" || oldTask.task_plan === null ? "unassigned" : oldTask.task_plan} -> ${task_plan === "" ? "unassigned" : task_plan}`, task_state, "system", currDate.toLocaleString());
         }
         newNote = await taskRepository.addNoteToTask(taskId, note2, note);
         // var notesDetails = { action: "update", from: task_plan, to: oldTask.task_plan, taskId: taskId };
@@ -147,24 +183,48 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
-    console.log("ran promoteTask");
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
     const userRepository = new UserRepository();
 
     const { taskId, username } = req.body;
-    var permittedUserGroups = "";
-    var permitted = false;
+
+    const user = await userRepository.getUserByUsername(req.body.verification.username);
+
     try {
         var task = await taskRepository.getTaskById(taskId);
     } catch (err) {
         throw new ErrorHandler("failed to run getTaskById", 400);
     }
+    const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);
+    switch (task.task_state) {
+        case "open":
+            if (!user[0].userGroups.includes(application.app_permit_open)) {
+                throw new ErrorHandler("User not permitted to promote this task", 401);
+            }
+            break;
+        case "todo":
+            if (!user[0].userGroups.includes(application.app_permit_todo)) {
+                throw new ErrorHandler("User not permitted to promote this task", 401);
+            }
+            break;
+        case "doing":
+            if (!user[0].userGroups.includes(application.app_permit_doing)) {
+                throw new ErrorHandler("User not permitted to promote this task", 401);
+            }
+            break;
+        case "done":
+            if (!user[0].userGroups.includes(application.app_permit_done)) {
+                throw new ErrorHandler("User not permitted to promote this task", 401);
+            }
+            break;
+        default:
+            throw new ErrorHandler("Task in none of the states", 500);
+    }
 
     var appAcronym = task.task_app_acronym;
     var taskState = task.task_state;
     var newState = req.newState;
-    console.log(newState);
 
     try {
         console.log(taskId, newState);
@@ -198,14 +258,43 @@ module.exports.demoteTask = catchAsyncErrors(async (req, res, next) => {
     console.log("ran promoteTask");
     const taskRepository = new TaskRepository();
     const applicationRepository = new ApplicationRepository();
+    const userRepository = new UserRepository();
 
     const { taskId, username } = req.body;
-    var permittedUserGroups = "";
-    var permitted = false;
+
+    const user = await userRepository.getUserByUsername(req.body.verification.username);
+
     try {
         var task = await taskRepository.getTaskById(taskId);
     } catch (err) {
         throw new ErrorHandler("failed to run getTaskById", 400);
+    }
+
+    const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);
+
+    switch (task.task_state) {
+        case "open":
+            if (!user[0].userGroups.includes(application.app_permit_open)) {
+                throw new ErrorHandler("User not permitted to demote this task", 401);
+            }
+            break;
+        case "todo":
+            if (!user[0].userGroups.includes(application.app_permit_todo)) {
+                throw new ErrorHandler("User not permitted to demote this task", 401);
+            }
+            break;
+        case "doing":
+            if (!user[0].userGroups.includes(application.app_permit_doing)) {
+                throw new ErrorHandler("User not permitted to demote this task", 401);
+            }
+            break;
+        case "done":
+            if (!user[0].userGroups.includes(application.app_permit_done)) {
+                throw new ErrorHandler("User not permitted to demote this task", 401);
+            }
+            break;
+        default:
+            throw new ErrorHandler("Task in none of the states", 500);
     }
 
     var appAcronym = task.task_app_acronym;
@@ -237,13 +326,11 @@ const addSystemGeneratedNote = async (details) => {
     } else if (details.action === "update") {
         var content = `${author} reassigned the plan: ${details.from} -> ${details.to}`;
     }
-    console.log("HELLO");
 
-    var note = new Note(content, details.from, author, new Date().toLocaleString());
+    var note = new Note(content, details.from, "system", new Date().toLocaleString());
 
     try {
         var noteAdded = await taskRepository.addNoteToTask(details.taskId, note);
-        console.log("noteAdd", noteAdded);
         return noteAdded;
     } catch (err) {
         throw new ErrorHandler("error adding notes", 500);

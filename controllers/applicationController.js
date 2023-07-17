@@ -1,9 +1,16 @@
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const Application = require("../models/Application");
 const ApplicationRepository = require("../Repository/ApplicationRepository");
+const UserRepository = require("../Repository/UserRepository");
 const ErrorHandler = require("../Utils/ErrorHandler");
 
 module.exports.createApplication = catchAsyncErrors(async (req, res, next) => {
+    const userRepository = new UserRepository();
+    var user = await userRepository.getUserByUsername(req.body.verification.username);
+
+    if (!user[0].userGroups.includes("project lead")) {
+        throw new ErrorHandler("User not permitted to create Application", 401);
+    }
     const { app_acronym, app_description, app_Rnumber, app_startdate, app_enddate, app_permit_create, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done } = req.body;
 
     const applicationData = new Application(app_acronym, app_description, app_Rnumber, app_startdate, app_enddate, app_permit_create, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done);
@@ -55,6 +62,13 @@ module.exports.deleteApplication = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateApplication = catchAsyncErrors(async (req, res, next) => {
+    const userRepository = new UserRepository();
+    var user = await userRepository.getUserByUsername(req.body.verification.username);
+
+    if (!user[0].userGroups.includes("project lead")) {
+        throw new ErrorHandler("User not permitted to update Application", 401);
+    }
+
     const { acronym } = req.params;
     const { app_description, app_startdate, app_enddate, app_permit_create, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done } = req.body;
 

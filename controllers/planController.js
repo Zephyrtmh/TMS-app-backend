@@ -1,19 +1,30 @@
 const PlanRepository = require("../Repository/PlanRepository");
 const ApplicationRepository = require("../Repository/ApplicationRepository");
+const UserRepository = require("../Repository/UserRepository");
 const ErrorHandler = require("../Utils/ErrorHandler");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const Plan = require("../models/Plan");
 
 module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
+    const applicationRepository = new ApplicationRepository();
+    const planRepository = new PlanRepository();
+    const userRepository = new UserRepository();
+
     const { plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym } = req.body;
+
+    const appAcronym = req.query.app;
+    //check for app_permit_open of application
+    application = applicationRepository.getApplicationByAcronym(appAcronym);
+    user = userRepository.getUserByUsername(req.body.verification.username);
+    if (!user[0].userGroups.includes(application.app_permit_open)) {
+        throw new ErrorHandler("User not permitted to create Plan", 401);
+    }
+    console.log("appAcronym", appAcronym);
 
     var colour = appointColour(plan_app_acronym);
     console.log("colour" + colour);
 
     const plan = new Plan(plan_mvp_name, new Date(plan_startdate), new Date(plan_enddate), plan_app_acronym, colour);
-
-    const planRepository = new PlanRepository();
-    const applicationRepository = new ApplicationRepository();
 
     //validate start date and end date
     var application = await applicationRepository.getApplicationByAcronym(plan_app_acronym);

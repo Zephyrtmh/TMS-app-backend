@@ -77,7 +77,7 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     }
     */
     const jwToken = req.cookies.jwToken;
-    console.log(jwToken);
+    console.log(req.body);
     try {
         var jwtContent = await authUtils.verifyJWToken(jwToken);
     } catch (err) {
@@ -105,6 +105,8 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
     }
     if (jwtIpAddress !== currIpAddress || jwtBrowserType !== currBrowserType || (currUsername !== jwtUsername && !noUsernameNeeded)) {
         throw new ErrorHandler("JWT does not match current system.", 401);
+    } else {
+        req.body.verification.username = jwtUsername;
     }
 
     const userRepository = new UserRepository();
