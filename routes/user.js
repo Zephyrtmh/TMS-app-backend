@@ -12,6 +12,6 @@ router.route("/user/create").post(createUser);
 router.route("/user/deactivate").post(verifyUser, deactivateUser);
 router.route("/user/activate").post(verifyUser, activateUser);
 router.route("/user/all").post(verifyUser, getAllUsers);
-router.route("/user/:username").post(getUserByUsername); //authenticateUser, accessUserDetails,
+router.route("/user/:username").post(verifyUser, getUserByUsername); //authenticateUser, accessUserDetails,
 
 module.exports = router;

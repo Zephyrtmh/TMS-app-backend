@@ -2,11 +2,16 @@ const User = require("../models/User");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../Utils/ErrorHandler");
 const UserRepository = require("../Repository/UserRepository");
+const { checkGroup } = require("../Utils/AuthorizationUtils");
 
 module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
     console.log("creating user");
     var userRepository = new UserRepository();
     console.log(req.body);
+
+    if (!checkGroup(req.body.verification.username, "admin")) {
+        throw new ErrorHandler("User not allowed to create User.", 401);
+    }
 
     //create User Model
     var userToAdd = new User(req.body.username, req.body.password, req.body.email, req.body.active, req.body.userGroups);
@@ -30,6 +35,9 @@ module.exports.createUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
+    if (!checkGroup(req.body.verification.username, "admin")) {
+        throw new ErrorHandler("User not allowed to create User.", 401);
+    }
     console.log("get all user is run");
     var userRepository = new UserRepository();
     var users = await userRepository.getAllUsers();
@@ -37,6 +45,14 @@ module.exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.getUserByUsername = catchAsyncErrors(async (req, res, next) => {
+    console.log(req.body.verification.username);
+    // console.log(await checkGroup(req.body.verification.username, "admin"));
+    console.log(req.params.username);
+    console.log(req.body.verification.username);
+    const isAdmin = await checkGroup(req.body.verification.username, "admin");
+    if (!isAdmin && req.params.username !== req.body.verification.username) {
+        throw new ErrorHandler("User not allowed to see User details.", 401);
+    }
     var userRepository = new UserRepository();
     var user = await userRepository.getUserByUsername(req.params.username);
     res.status(200).json(user[0]);
@@ -82,6 +98,9 @@ module.exports.activateUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 module.exports.updateUser = catchAsyncErrors(async (req, res, next) => {
+    if (!checkGroup(req.body.verification.username, "admin") && req.params.username !== req.body.verification.username) {
+        throw new ErrorHandler("User not allowed to edit User.", 401);
+    }
     console.log("update user is run");
     var username = req.params.username;
     var password = req.body.password;

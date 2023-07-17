@@ -9,7 +9,6 @@ module.exports.checkGroup = async (username, userGroup) => {
         console.log(userGroupActual);
         for (let userGroup_ of userGroupActual) {
             if (userGroup_ === userGroup) {
-                console.log("something" + userGroup_ + userGroup);
                 return true;
             }
         }
