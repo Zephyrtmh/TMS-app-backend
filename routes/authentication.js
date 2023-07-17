@@ -7,6 +7,6 @@ const { loginUser, logoutUser, verifyUser, verifyUserWithHeaders } = require("..
 
 router.route("/login").post(loginUser);
 router.route("/logout").post(logoutUser);
-router.route("/verifyuser").post(verifyUserWithHeaders);
+router.route("/verifyuser").post(verifyUser);
 
 module.exports = router;
