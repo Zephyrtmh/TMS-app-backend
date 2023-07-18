@@ -169,7 +169,8 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
     //     this.taskCreator = taskCreator;
     //     this.taskOwner = taskOwner;
     //     this.taskCreateDate = taskCreateDate;
-    const updatedTaskData = { task_name, task_description, newNote, task_plan, task_state, task_creator, task_owner };
+
+    const updatedTaskData = { task_name, task_description, newNote, task_plan: task_plan === "" ? null : task_plan, task_state, task_creator, task_owner };
 
     try {
         const updateResult = await taskRepository.updateTask(updatedTaskData, taskId);

@@ -36,7 +36,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
     console.log(req.params);
     const taskId = req.body.taskId || req.params.taskId;
     console.log(username, taskId);
-    const action = req.body.action;
+    const action = req.query.action;
 
     var permittedUserGroups = "";
     var permitted = false;
@@ -44,7 +44,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
     var appAcronym = task.task_app_acronym;
     var taskState = task.task_state;
     var newState = "";
-    console.log(taskState);
+    console.log("taskState", taskState);
 
     //check if user is permitted to promote task
     switch (taskState) {
@@ -57,7 +57,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             try {
                 permitted = await userIsPermitted(username, [permittedUserGroup]);
             } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
+                throw new ErrorHandler("Error check if user is permitted", 401);
             }
             if (action) {
                 if (action === "promote") {
@@ -71,18 +71,20 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             try {
                 var permittedUserGroup = (await applicationRepository.getApplicationToDoPermits(appAcronym)).app_permit_todo;
             } catch (err) {
-                throw new ErrorHandler("Error getting permissions for open", 400);
+                throw new ErrorHandler("Error getting permissions for open", 401);
             }
             try {
                 permitted = await userIsPermitted(username, [permittedUserGroup]);
             } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
+                throw new ErrorHandler("Error check if user is permitted", 401);
             }
+            console.log("action", action);
             if (action) {
                 if (action === "promote") {
                     newState = "doing";
                 } else if (action === "demote") {
-                    throw new ErrorHandler("task in todo state cannot be demoted to open", 400);
+                    console.log("this was ran");
+                    return new ErrorHandler("task in todo state cannot be demoted to open", 401);
                 }
             }
             break;
@@ -90,12 +92,12 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             try {
                 var permittedUserGroup = (await applicationRepository.getApplicationDoingPermits(appAcronym)).app_permit_doing;
             } catch (err) {
-                throw new ErrorHandler("Error getting permissions for open", 400);
+                throw new ErrorHandler("Error getting permissions for open", 401);
             }
             try {
                 permitted = await userIsPermitted(username, [permittedUserGroup]);
             } catch (err) {
-                throw new ErrorHandler("Error check if user is permitted", 400);
+                throw new ErrorHandler("Error check if user is permitted", 401);
             }
             if (action) {
                 if (action === "promote") {

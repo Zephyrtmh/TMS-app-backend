@@ -17,6 +17,9 @@ module.exports.createApplication = catchAsyncErrors(async (req, res, next) => {
     if (app_Rnumber > 200) {
         throw new ErrorHandler("App R Number cannot be greater than 200", 500);
     }
+    if (app_acronym && app_acronym.trim() === "") {
+        throw new ErrorHandler("App acronym cannot be empty string", 500);
+    }
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(app_startdate) || !dateRegex.test(app_enddate)) {
         throw new ErrorHandler("Invalid date format. Needs to be YYYY-MM-dd", 500);

@@ -1,4 +1,5 @@
 const GroupRepository = require("../Repository/GroupRepository");
+const UserRepository = require("../Repository/UserRepository");
 const ErrorHandler = require("../Utils/ErrorHandler");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 
