@@ -15,6 +15,7 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     const userRepository = new UserRepository();
 
     const { task_name, task_description, task_notes, task_plan, task_app_acronym, task_creator } = req.body;
+
     var task_state = "open";
     var task_owner = task_creator;
     var application = await applicationRepository.getApplicationByAcronym(task_app_acronym);
@@ -28,7 +29,9 @@ module.exports.createTask = catchAsyncErrors(async (req, res, next) => {
     if (!user[0].userGroups.includes(application.app_permit_create)) {
         throw new ErrorHandler("User not permitted to create Plan", 401);
     }
-
+    if (/\|/.test(task_notes)) {
+        throw new ErrorHandler("Notes cannot contain character |.");
+    }
     var formatted_task_notes = "";
     if (task_notes !== "") {
         formatted_task_notes = `${req.body.verification.username} created the task|${task_state}|system|${new Date().toLocaleString()}|${task_notes}|${task_state}|${req.body.verification.username}|${new Date().toLocaleString()}`;
@@ -105,7 +108,9 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
 
     const { taskId } = req.params;
     const { task_name, task_description, task_notes, task_plan, task_state, task_creator, task_owner, oldTask } = req.body;
-
+    if (/\|/.test(task_notes)) {
+        throw new ErrorHandler("Notes cannot contain character |.");
+    }
     const user = await userRepository.getUserByUsername(req.body.verification.username);
     const task = await taskRepository.getTaskById(taskId);
     const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);

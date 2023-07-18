@@ -12,14 +12,13 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
 
     const { plan_mvp_name, plan_startdate, plan_enddate, plan_app_acronym } = req.body;
 
-    const appAcronym = req.query.app;
     //check for app_permit_open of application
-    application = applicationRepository.getApplicationByAcronym(appAcronym);
-    user = userRepository.getUserByUsername(req.body.verification.username);
+    var application = await applicationRepository.getApplicationByAcronym(plan_app_acronym);
+    var user = await userRepository.getUserByUsername(req.body.verification.username);
+
     if (!user[0].userGroups.includes(application.app_permit_open)) {
         throw new ErrorHandler("User not permitted to create Plan", 401);
     }
-    console.log("appAcronym", appAcronym);
 
     var colour = appointColour(plan_app_acronym);
     console.log("colour" + colour);
@@ -27,7 +26,7 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     const plan = new Plan(plan_mvp_name, new Date(plan_startdate), new Date(plan_enddate), plan_app_acronym, colour);
 
     //validate start date and end date
-    var application = await applicationRepository.getApplicationByAcronym(plan_app_acronym);
+    // var application = await applicationRepository.getApplicationByAcronym(plan_app_acronym);
     var appStartDate = application.app_startdate;
     var appEndDate = application.app_enddate;
     console.log("appstartdate: " + appStartDate);
@@ -35,21 +34,27 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     console.log("plan_startdate " + plan.planStartDate);
     console.log("plan_enddate " + plan.planEndDate);
     //invalid startdate
-    if (!(plan.planStartDate > appStartDate)) {
+    if (!(plan.planStartDate >= appStartDate)) {
         throw new ErrorHandler("Invalid date. input plan start date not after application start date", 400);
     }
     //invalid enddate
-    if (!(plan.planEndDate < appEndDate)) {
+    else if (!(plan.planEndDate <= appEndDate)) {
         throw new ErrorHandler("Invalid date. input plan end date not before application end date", 400);
     }
-
+    console.log("plan", plan);
     try {
         const createdPlan = await planRepository.createPlan(plan);
+
         res.status(200).json({
             success: true,
             plan: createdPlan,
         });
     } catch (err) {
+        console.log("err", err.message);
+
+        if (err.message.includes("Duplicate")) {
+            throw new ErrorHandler("Plan already exists try a different Plan name.", 500);
+        }
         next(err);
     }
 });

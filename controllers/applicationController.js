@@ -13,6 +13,15 @@ module.exports.createApplication = catchAsyncErrors(async (req, res, next) => {
     }
     const { app_acronym, app_description, app_Rnumber, app_startdate, app_enddate, app_permit_create, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done } = req.body;
 
+    //validation
+    if (app_Rnumber > 200) {
+        throw new ErrorHandler("App R Number cannot be greater than 200", 500);
+    }
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(app_startdate) || !dateRegex.test(app_enddate)) {
+        throw new ErrorHandler("Invalid date format. Needs to be YYYY-MM-dd", 500);
+    }
+
     const applicationData = new Application(app_acronym, app_description, app_Rnumber, app_startdate, app_enddate, app_permit_create, app_permit_open, app_permit_todo, app_permit_doing, app_permit_done);
 
     const applicationRepository = new ApplicationRepository();

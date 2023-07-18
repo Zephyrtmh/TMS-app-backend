@@ -35,6 +35,8 @@ class ApplicationRepository {
 
     async getApplicationByAcronym(acronym) {
         var [application] = await connection.execute(applicationSql.getApplicationByAppAcronym, [acronym]);
+        console.log("application", application);
+
         return application[0];
     }
 
