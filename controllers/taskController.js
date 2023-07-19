@@ -241,6 +241,7 @@ module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
         var notesDetails = { action: "promote", from: taskState, to: newState, taskId: taskId, author: username };
         var newNotes = await addSystemGeneratedNote(notesDetails);
         console.log(newNotes);
+
         var promoted = await taskRepository.promoteTask(taskId, newState, newNotes);
         console.log("newState", newState);
         if (newState === "done") {

@@ -36,7 +36,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
     console.log(req.params);
     const taskId = req.body.taskId || req.params.taskId;
     console.log(username, taskId);
-    const action = req.query.action;
+    const action = req.body.action || req.query.action;
 
     var permittedUserGroups = "";
     var permitted = false;
@@ -108,6 +108,7 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             }
             break;
         case "done":
+            console.log("task is in done");
             try {
                 var permittedUserGroup = (await applicationRepository.getApplicationDonePermits(appAcronym)).app_permit_done;
             } catch (err) {
@@ -118,8 +119,10 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
             } catch (err) {
                 throw new ErrorHandler("Error check if user is permitted", 400);
             }
+            console.log("action", action);
             if (action) {
                 if (action === "promote") {
+                    console.log("state is closed");
                     newState = "closed";
                 } else if (action === "demote") {
                     newState = "doing";
@@ -134,7 +137,9 @@ module.exports.canEditTask = catchAsyncErrors(async (req, res, next) => {
     if (!permitted) {
         throw new ErrorHandler("Not Authorized to view this user profile", 401);
     } else {
+        console.log("this was promoted");
         req.newState = newState;
+        console.log("newState", newState);
         next();
     }
 });

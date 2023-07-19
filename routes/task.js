@@ -6,7 +6,7 @@ const { verifyUser } = require("../controllers/authenticationController");
 const { authenticateUser } = require("../middlewares/jwtAuthenticate");
 const { accessUserDetails, canEditTask } = require("../middlewares/authorization");
 
-router.route("/task/:taskId").put(verifyUser, accessUserDetails, updateTask);
+router.route("/task/:taskId").put(verifyUser, updateTask);
 router.route("/task/create").post(verifyUser, createTask);
 router.route("/task/delete/:taskId").delete(verifyUser, accessUserDetails, deleteTask);
 router.route("/task/all").post(verifyUser, getAllTasks);
