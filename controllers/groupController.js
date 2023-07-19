@@ -12,7 +12,7 @@ module.exports.getUserGroups = catchAsyncErrors(async (req, res, next) => {
 module.exports.createUserGroup = catchAsyncErrors(async (req, res, next) => {
     const userRepository = new UserRepository();
     var user = await userRepository.getUserByUsername(req.body.verification.username);
-
+    //TODO: implement check group here
     if (!user[0].userGroups.includes("admin")) {
         throw new ErrorHandler("User not permitted to create UserGroup", 401);
     }

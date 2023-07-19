@@ -15,7 +15,7 @@ module.exports.createPlan = catchAsyncErrors(async (req, res, next) => {
     //check for app_permit_open of application
     var application = await applicationRepository.getApplicationByAcronym(plan_app_acronym);
     var user = await userRepository.getUserByUsername(req.body.verification.username);
-
+    //TODO: implement check group here
     if (!user[0].userGroups.includes(application.app_permit_open)) {
         throw new ErrorHandler("User not permitted to create Plan", 401);
     }

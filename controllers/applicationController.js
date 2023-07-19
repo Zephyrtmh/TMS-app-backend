@@ -7,7 +7,7 @@ const ErrorHandler = require("../Utils/ErrorHandler");
 module.exports.createApplication = catchAsyncErrors(async (req, res, next) => {
     const userRepository = new UserRepository();
     var user = await userRepository.getUserByUsername(req.body.verification.username);
-
+    //TODO: implement check group here
     if (!user[0].userGroups.includes("project lead")) {
         throw new ErrorHandler("User not permitted to create Application", 401);
     }

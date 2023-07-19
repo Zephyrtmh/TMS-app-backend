@@ -111,6 +111,8 @@ module.exports.updateTask = catchAsyncErrors(async (req, res, next) => {
     if (/\|/.test(task_notes)) {
         throw new ErrorHandler("Notes cannot contain character |.");
     }
+
+    //TODO: implement check group here
     const user = await userRepository.getUserByUsername(req.body.verification.username);
     const task = await taskRepository.getTaskById(taskId);
     const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);
@@ -202,6 +204,8 @@ module.exports.promoteTask = catchAsyncErrors(async (req, res, next) => {
     } catch (err) {
         throw new ErrorHandler("failed to run getTaskById", 400);
     }
+
+    //TODO: implement check group here
     const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);
     switch (task.task_state) {
         case "open":
@@ -278,6 +282,7 @@ module.exports.demoteTask = catchAsyncErrors(async (req, res, next) => {
 
     const application = await applicationRepository.getApplicationByAcronym(task.task_app_acronym);
 
+    //TODO: implement check group here
     switch (task.task_state) {
         case "open":
             if (!user[0].userGroups.includes(application.app_permit_open)) {
