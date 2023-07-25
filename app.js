@@ -9,9 +9,11 @@ const taskRoutes = require("./routes/task");
 const ErrorHandler = require("./Utils/ErrorHandler");
 const authenticationRoutes = require("./routes/authentication");
 const cookieParser = require("cookie-parser");
+const dotenv = require("dotenv");
+const cors = require("cors");
 
 //enable cors
-const cors = require("cors");
+
 app.use(
     cors({
         origin: "http://localhost:3000",
@@ -22,8 +24,6 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-const dotenv = require("dotenv");
-
 dotenv.config({ path: "./config/config.env" });
 
 app.use(applicationRoutes);
@@ -32,6 +32,20 @@ app.use(userRoutes);
 app.use(groupRoutes);
 app.use(taskRoutes);
 app.use(planRoutes);
+
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+        res.status(200).json({ code: "E013" });
+    } else {
+        next();
+    }
+});
+
+app.use((req, res, next) => {
+    res.status(200).send({
+        code: "E007",
+    });
+});
 
 app.all("*", (req, res, next) => {
     next(new ErrorHandler(`${req.originalUrl} route not found`, 404));

@@ -15,6 +15,10 @@ const deleteTask = "DELETE FROM tasks WHERE task_id = ?;";
 
 const promoteTask = "UPDATE tasks SET task_state = ?, task_notes = ? WHERE task_id = ?";
 
+const getTaskByState = "SELECT task_name, task_description, task_notes, task_id, task_plan, task_app_acronym, task_state, task_creator, task_owner, task_createdate , plans.plan_colour FROM tasks LEFT JOIN plans ON tasks.task_plan = plans.plan_MVP_name WHERE task_state = ?;";
+
+const getTasksByStateAndAppAcronym = "SELECT task_name, task_description, task_notes, task_id, task_plan, task_app_acronym, task_state, task_creator, task_owner, task_createdate , plans.plan_colour FROM tasks LEFT JOIN plans ON tasks.task_plan = plans.plan_MVP_name WHERE task_state = ? AND task_app_acronym = ?;";
+
 module.exports = {
     createTask,
     getTaskByTaskId,
@@ -24,4 +28,6 @@ module.exports = {
     getTasksByApp,
     promoteTask,
     getAllTasksByAppAcronym,
+    getTaskByState,
+    getTasksByStateAndAppAcronym,
 };

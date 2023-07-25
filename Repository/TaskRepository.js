@@ -41,8 +41,18 @@ class TaskRepository {
         return tasks;
     }
 
+    async getTasksByState(state) {
+        var [tasks] = await connection.execute(taskSql.getTaskByState, [state]);
+        return tasks;
+    }
+
+    async getTasksByStateAndAppAcronym(state, appAcronym) {
+        var [tasks] = await connection.execute(taskSql.getTaskByState, [state]);
+        return tasks;
+    }
+
     async getAllTasksByAppAcronym(appAcronym) {
-        var [tasks] = await connection.execute(taskSql.getAllTasksByAppAcronym, [appAcronym]);
+        var [tasks] = await connection.execute(taskSql.getAllTasksByAppAcronym, [state, appAcronym]);
         return tasks;
     }
 

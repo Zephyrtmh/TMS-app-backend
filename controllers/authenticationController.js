@@ -104,6 +104,12 @@ module.exports.verifyUser = catchAsyncErrors(async (req, res, next) => {
         noUsernameNeeded = true;
     }
     if (jwtIpAddress !== currIpAddress || jwtBrowserType !== currBrowserType || (currUsername !== jwtUsername && !noUsernameNeeded)) {
+        console.log("jwtUsername", jwtUsername);
+        console.log("currBrowserType", currBrowserType);
+        console.log("currIpAddress", currIpAddress);
+        console.log("currUsername", currUsername);
+        console.log("jwtBrowserType", jwtBrowserType);
+        console.log("jwtIpAddress", jwtIpAddress);
         throw new ErrorHandler("JWT does not match current system.", 401);
     } else {
         req.body.verification.username = jwtUsername;
