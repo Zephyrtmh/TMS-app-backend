@@ -1,6 +1,6 @@
-const connection = require("../sqlConnection/sqlConnection");
 const Task = require("../models/Task");
 const taskSql = require("../sql/taskSql");
+const connection = require("../sqlConnection/sqlConnection");
 // Import any necessary SQL queries or utility functions
 
 class TaskRepository {

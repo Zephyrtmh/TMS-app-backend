@@ -6,6 +6,14 @@ const ErrorHandler = require("../Utils/ErrorHandler");
 
 class UserRepository {
     async createUser(user) {
+        const connection = mysql
+            .createPool({
+                host: "localhost",
+                user: process.env.DB_USERNAME,
+                password: process.env.DB_PASSWORD,
+                database: "tmsdb",
+            })
+            .promise();
         var existingUser = await this.getUserByUsername(user.username);
         if (existingUser.length > 0) {
             throw new ErrorHandler("Username already exists. Try using a different username.", 422);

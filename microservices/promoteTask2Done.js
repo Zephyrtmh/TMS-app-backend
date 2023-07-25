@@ -1,6 +1,4 @@
 const bcrypt = require("bcryptjs");
-const mysql = require("mysql");
-const nodemailer = require("nodemailer");
 
 const TaskRepository = require("../Repository/TaskRepository");
 const ApplicationRepository = require("../Repository/ApplicationRepository");

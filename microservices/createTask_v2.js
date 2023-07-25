@@ -50,6 +50,7 @@ module.exports.createTask_v2 = catchAsyncErrors(async (req, res, next) => {
     try {
         var user = await userRepository.getUserByUsername(username);
     } catch (err) {
+        console.log(err);
         return res.status(200).json({
             code: "E004",
         });

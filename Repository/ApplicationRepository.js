@@ -1,6 +1,6 @@
-const connection = require("../sqlConnection/sqlConnection");
 const Application = require("../models/Application");
 const applicationSql = require("../sql/applicationSql");
+const connection = require("../sqlConnection/sqlConnection");
 // Import any necessary SQL queries or utility functions
 
 class ApplicationRepository {

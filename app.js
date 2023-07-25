@@ -1,16 +1,20 @@
 const express = require("express");
 const app = express();
 const errorMiddleware = require("./middlewares/handleErrors");
-const userRoutes = require("./routes/user");
-const groupRoutes = require("./routes/group");
-const applicationRoutes = require("./routes/application");
-const planRoutes = require("./routes/plan");
-const taskRoutes = require("./routes/task");
 const ErrorHandler = require("./Utils/ErrorHandler");
-const authenticationRoutes = require("./routes/authentication");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
+
+const router = express.Router();
+dotenv.config({ path: "./config/config.env" });
+const { createTask_v2 } = require("./microservices/createTask_v2");
+const { getTaskByState } = require("./microservices/getTaskByState");
+const { promoteTask2Done } = require("./microservices/promoteTask2Done");
+
+router.route("/createTask").post(createTask_v2);
+router.route("/getTaskByState").post(getTaskByState);
+router.route("/promoteTask2Done").patch(promoteTask2Done);
 
 //enable cors
 
@@ -24,14 +28,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-dotenv.config({ path: "./config/config.env" });
-
-app.use(applicationRoutes);
-app.use(authenticationRoutes);
-app.use(userRoutes);
-app.use(groupRoutes);
-app.use(taskRoutes);
-app.use(planRoutes);
+app.use(router);
 
 app.use((err, req, res, next) => {
     if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
@@ -54,6 +51,7 @@ app.all("*", (req, res, next) => {
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
+console.log("DB_USERNAME", process.env.DB_USERNAME);
 
 app.listen(PORT, () => {
     console.log(`Server started on port ${process.env.PORT}`);

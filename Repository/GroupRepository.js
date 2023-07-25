@@ -1,8 +1,8 @@
-const connection = require("../sqlConnection/sqlConnection");
 const User = require("../models/User");
 const userGroupSql = require("../sql/userGroupSql");
 const authUtils = require("../Utils/AuthUtils");
 const ErrorHandler = require("../Utils/ErrorHandler");
+const connection = require("../sqlConnection/sqlConnection");
 
 class GroupRepository {
     async getUserGroups() {

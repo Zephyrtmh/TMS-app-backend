@@ -1,6 +1,6 @@
-const connection = require("../sqlConnection/sqlConnection");
 const Plan = require("../models/Plan");
 const planSql = require("../sql/planSql");
+const connection = require("../sqlConnection/sqlConnection");
 // Import any necessary SQL queries or utility functions
 
 class PlanRepository {
