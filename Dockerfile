@@ -1,5 +1,9 @@
 FROM node:current-alpine3.18
 
+RUN adduser -D dockerbuilder
+
+USER dockerbuilder
+
 WORKDIR /app
 
 COPY package.json .

@@ -1,5 +1,8 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+if (process.env.NODE_ENV === "development") {
+    const jwt = require("jsonwebtoken");
+}
+
 const ErrorHandler = require("../Utils/ErrorHandler");
 
 async function hashPassword(password) {

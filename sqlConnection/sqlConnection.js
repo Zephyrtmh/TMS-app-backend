@@ -27,7 +27,7 @@ const mySqlConnection2 = async () => {
 console.log("DB_USERNAME2", process.env.DB_USERNAME);
 const mySqlConnection = mysql
     .createPool({
-        host: "localhost",
+        host: process.env.DB_HOST,
         user: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: "tmsdb",

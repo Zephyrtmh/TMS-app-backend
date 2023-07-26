@@ -154,6 +154,9 @@ class UserRepository {
     async getUserByUsername(username) {
         //for users without usergroups
         // for users with usergroups
+        console.log("process.env.DB_PASSWORD", process.env.DB_PASSWORD);
+        console.log("process.env.DB_USERNAME", process.env.DB_USERNAME);
+
         var users = await connection.execute(userSql.getUserByUsername, [username]);
 
         const formattedUser = users[0].reduce((result, user) => {
