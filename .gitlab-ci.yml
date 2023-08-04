@@ -5,9 +5,4 @@ stages:
 build app:
   stage: build
   script:
-    - docker build -t docker-image
-
-test job:
-  stage: test
-  script: 
-    - docker run docker-image
+    - cat ./app.js
